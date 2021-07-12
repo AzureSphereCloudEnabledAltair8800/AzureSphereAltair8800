@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "route": "/api/*",
+      "allowedRoles": ["users"]
+    },
+    {
+      "route": "/app",
+      "allowedRoles": ["users"]
+    }
+  ]
+}

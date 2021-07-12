@@ -1,0 +1,11 @@
+[Unit]
+After=mosquitto.service
+Description=Alatir Virtual Disk Server
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/pyvdisk
+ExecStart=/opt/pyvdisk/pyvdisk.sh
+
+[Install]
+WantedBy=multi-user.target

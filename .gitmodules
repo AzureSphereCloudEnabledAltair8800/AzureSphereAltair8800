@@ -1,0 +1,18 @@
+[submodule "AltairHL_emulator/wolfMQTT"]
+	path = AltairHL_emulator/wolfMQTT
+	url = https://github.com/AzureSphereCloudEnabledAltair8800/wolfMQTT.git
+[submodule "AltairHL_emulator/Disks"]
+	path = AltairHL_emulator/Disks
+	url = https://github.com/AzureSphereCloudEnabledAltair8800/AzureSphereCloudEnabledAltair8800.disks.git
+[submodule "AltairRT_disk_cache_server/mt3620_m4_software"]
+	path = AltairRT_disk_cache_server/mt3620_m4_software
+	url = https://github.com/MediaTek-Labs/mt3620_m4_software.git
+[submodule "AltairRT_enviromon/mt3620_m4_software"]
+	path = AltairRT_enviromon/mt3620_m4_software
+	url = https://github.com/MediaTek-Labs/mt3620_m4_software.git
+[submodule "AltairHL_emulator/AzureSphereDevX"]
+	path = AltairHL_emulator/AzureSphereDevX
+	url = https://github.com/gloveboxes/AzureSphereDevX.git
+[submodule "Drivers"]
+	path = Drivers
+	url = https://github.com/gloveboxes/AzureSphereDrivers.git
