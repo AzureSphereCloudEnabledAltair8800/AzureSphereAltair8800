@@ -11,10 +11,10 @@ set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")
 
 # SELECT FRONT PANEL CONFIG #######################################################################################
 #
-# set(ALTAIR_FRONT_PANEL_NONE TRUE "Altair on Azure Sphere with no panel.")
+set(ALTAIR_FRONT_PANEL_NONE TRUE "Altair on Azure Sphere with no panel.")
 # set(ALTAIR_FRONT_PANEL_KIT TRUE "Altair front panel board")
 # set(ALTAIR_FRONT_PANEL_CLICK TRUE "Altair front panel board using Click 4x4 keypad and Click 8x8 LED matrix")
-set(ALTAIR_FRONT_PANEL_RETRO_CLICK TRUE "Altair front panel board using 8800 Retro click")
+# set(ALTAIR_FRONT_PANEL_RETRO_CLICK TRUE "Altair front panel board using 8800 Retro click")
 #
 ###################################################################################################################
 
