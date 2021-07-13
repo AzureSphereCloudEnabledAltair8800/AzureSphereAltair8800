@@ -13,3 +13,6 @@
 [submodule "Drivers"]
 	path = Drivers
 	url = https://github.com/gloveboxes/AzureSphereDrivers.git
+[submodule "AltairHL_emulator/Disks"]
+	path = AltairHL_emulator/Disks
+	url = https://github.com/AzureSphereCloudEnabledAltair8800/AzureSphereAltair8800.disks.git
