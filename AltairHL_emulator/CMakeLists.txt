@@ -48,7 +48,10 @@ add_compile_definitions(WOLFMQTT_USER_SETTINGS)
 
 
 ###################################################################################################################
-
+# IoT Hub Polling time overide
+add_compile_definitions(IOT_HUB_POLL_TIME_SECONDS=1)
+add_compile_definitions(IOT_HUB_POLL_TIME_NANOSECONDS=500000000)
+###################################################################################################################
 
 
 cmake_minimum_required (VERSION 3.10)
