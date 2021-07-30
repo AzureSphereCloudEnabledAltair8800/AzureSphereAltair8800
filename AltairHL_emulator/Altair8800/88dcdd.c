@@ -89,15 +89,15 @@ static void vdisk_cache_read_sector(disk_t *pDisk)
 
     if (vdisk_sector.dirty) {
         if (requested_sector_number != vdisk_sector.sector_number) {
-            (*(int *)dt_diskCacheMisses.twinState)++;
+            (*(int *)dt_diskCacheMisses.propertyValue)++;
         } else {
             memcpy(pDisk->sectorData, vdisk_sector.data, SECTOR_SIZE);
             pDisk->sectorPointer = 0;
             read_from_cache = true;
-            (*(int *)dt_diskCacheHits.twinState)++;
+            (*(int *)dt_diskCacheHits.propertyValue)++;
         }
     } else {
-        (*(int *)dt_diskCacheMisses.twinState)++;
+        (*(int *)dt_diskCacheMisses.propertyValue)++;
     }
 }
 
@@ -144,7 +144,7 @@ int write_virtual_sector(disk_t *pDisk)
     vdisk_cache_write_sector(pDisk->sectorData, (uint16_t)(pDisk->diskPointer / 137));
     vdisk_mqtt_write_sector(&write_sector);
 
-    (*(int *)dt_diskTotalWrites.twinState)++;
+    (*(int *)dt_diskTotalWrites.propertyValue)++;
 
     return 0;
 }
@@ -185,7 +185,7 @@ bool read_virtual_sector(disk_t *pDisk)
 
         } else {
             // Log_Debug("VDISK Read Fail\n");
-            (*(int *)dt_diskTotalErrors.twinState)++;
+            (*(int *)dt_diskTotalErrors.propertyValue)++;
         }
     }
 

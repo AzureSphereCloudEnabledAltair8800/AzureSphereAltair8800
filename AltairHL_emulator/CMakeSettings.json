@@ -20,7 +20,7 @@
       "variables": [
         {
           "name": "AZURE_SPHERE_TARGET_API_SET",
-          "value": "latest-lts"
+          "value": "10"
         }
       ],
       "enableClangTidyCodeAnalysis": true,
@@ -41,7 +41,7 @@
       "variables": [
         {
           "name": "AZURE_SPHERE_TARGET_API_SET",
-          "value": "latest-lts"
+          "value": "10"
         }
       ],
       "enableClangTidyCodeAnalysis": true,

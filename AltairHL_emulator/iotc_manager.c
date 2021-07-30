@@ -13,30 +13,30 @@ static const char* memoryTemplate = "{ \"TotalMemoryUsage\":%d,\"PeakUserModeMem
 void device_twin_set_cpu_state_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
 #ifdef ENABLE_WEB_TERMINAL
 	if (is_mqtt_connected()) {
-		cpu_operating_mode = *(bool*)deviceTwinBinding->twinState ? CPU_RUNNING : CPU_STOPPED;
+		cpu_operating_mode = *(bool*)deviceTwinBinding->propertyValue ? CPU_RUNNING : CPU_STOPPED;
 	}
 #else
-	cpu_operating_mode = *(bool*)deviceTwinBinding->twinState ? CPU_RUNNING : CPU_STOPPED;
+	cpu_operating_mode = *(bool*)deviceTwinBinding->propertyValue ? CPU_RUNNING : CPU_STOPPED;
 #endif // ENABLE_WEB_TERMINAL
-	dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+	dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 }
 
 void device_twin_set_local_serial_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-	local_serial = *(bool*)deviceTwinBinding->twinState;
-	dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+	local_serial = *(bool*)deviceTwinBinding->propertyValue;
+	dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 }
 
 /// <summary>
 /// Device Twin Handler to set the brightness of MAX7219 8x8 LED panel8x8
 /// </summary>
 void device_twin_set_led_brightness_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-	if (*(int*)deviceTwinBinding->twinState < 0 || (*(int*)deviceTwinBinding->twinState) > 15) {
-		dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+	if (*(int*)deviceTwinBinding->propertyValue < 0 || (*(int*)deviceTwinBinding->propertyValue) > 15) {
+		dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_ERROR);
 	} else {
 #ifdef ALTAIR_FRONT_PANEL_CLICK
-		max7219_set_brightness(&panel8x8, (unsigned char)*(int*)deviceTwinBinding->twinState);
+		max7219_set_brightness(&panel8x8, (unsigned char)*(int*)deviceTwinBinding->propertyValue);
 #endif // ALTAIR_FRONT_PANEL_CLICK
-		dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+		dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 	}
 }
 
@@ -44,8 +44,8 @@ void device_twin_set_led_brightness_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBi
 /// Device Twin Handler to set the mqtt channel id
 /// </summary>
 void device_twin_set_channel_id_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-	write_channel_id_to_storage(*(int*)deviceTwinBinding->twinState);
-	dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+	write_channel_id_to_storage(*(int*)deviceTwinBinding->propertyValue);
+	dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 }
 
 /// <summary>
