@@ -30,11 +30,13 @@ void device_twin_set_local_serial_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBind
 /// Device Twin Handler to set the brightness of MAX7219 8x8 LED panel8x8
 /// </summary>
 void device_twin_set_led_brightness_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
-	if (*(int*)deviceTwinBinding->propertyValue < 0 || (*(int*)deviceTwinBinding->propertyValue) > 15) {
+    if (!IN_RANGE(*(int *)deviceTwinBinding->propertyValue, 0, 15)) {
 		dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_ERROR);
 	} else {
 #ifdef ALTAIR_FRONT_PANEL_CLICK
 		max7219_set_brightness(&panel8x8, (unsigned char)*(int*)deviceTwinBinding->propertyValue);
+#elif ALTAIR_FRONT_PANEL_RETRO_CLICK
+		as1115_set_brightness(&retro_click, (unsigned char)*(int *)deviceTwinBinding->propertyValue);
 #endif // ALTAIR_FRONT_PANEL_CLICK
 		dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 	}

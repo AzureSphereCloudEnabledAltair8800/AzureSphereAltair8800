@@ -5,8 +5,9 @@
 
 #include "comms_manager_wolf.h"
 #include "dx_azure_iot.h"
-#include "storage.h"
+#include "dx_utilities.h"
 #include "sphere_panel.h"
+#include "storage.h"
 #include <applibs/applications.h>
 #include <applibs/powermanagement.h>
 
@@ -22,6 +23,12 @@ extern uint16_t cpu_speed;
 extern matrix8x8_t panel8x8;
 
 #endif // ALTAIR_FRONT_PANEL_CLICK
+
+#ifdef ALTAIR_FRONT_PANEL_RETRO_CLICK
+#include "as1115.h"
+extern as1115_t retro_click;
+#endif //  ALTAIR_FRONT_PANEL_RETRO_CLICK
+
 
 
 DX_DIRECT_METHOD_RESPONSE_CODE RestartDeviceHandler(JSON_Value* json, DX_DIRECT_METHOD_BINDING* directMethodBinding, char** responseMsg);
