@@ -135,7 +135,7 @@ static void mqtt_connected_cb(void)
         int len = snprintf(msgBuffer, sizeof(msgBuffer), connected_message, ALTAIR_ON_AZURE_SPHERE_VERSION, AZURE_SPHERE_DEVX_VERSION);
         queue_mqtt_message(msgBuffer, (size_t)len);
         cpu_operating_mode = CPU_RUNNING;
-        // if (dt_desiredCpuState.twinState) {
+        // if (dt_desiredCpuState.propertyValue) {
         //	cpu_operating_mode = CPU_RUNNING;
         //}
     } else {
@@ -211,15 +211,15 @@ static void intercore_disk_cache_receive_msg_handler(void *data_block, ssize_t m
 static void device_twin_set_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
     // validate data is sensible range before applying
-    if (deviceTwinBinding->twinType == DX_TYPE_INT && *(int *)deviceTwinBinding->twinState >= -20 && *(int *)deviceTwinBinding->twinState <= 80) {
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_INT && *(int *)deviceTwinBinding->propertyValue >= -20 && *(int *)deviceTwinBinding->propertyValue <= 80) {
         // Send the desired temperate to the real-time core enviromon app
         intercore_send_block.ic_msg_type = ALTAIR_IC_THERMOSTAT;
-        intercore_send_block.environment.desired_temperature = *(int *)deviceTwinBinding->twinState;
+        intercore_send_block.environment.desired_temperature = *(int *)deviceTwinBinding->propertyValue;
         dx_intercorePublish(&intercore_environment_ctx, &intercore_send_block, sizeof(INTERCORE_ENVIRONMENT_T));
         // acknowledge the device twin
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
     } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_ERROR);
     }
 }
 
@@ -241,11 +241,11 @@ static void measure_sensor_handler(EventLoopTimer *eventLoopTimer)
 
     if (++device_twin_update_rate > 5) { // send every 6 updates = every 30 seconds
         device_twin_update_rate = 0;
-        dx_deviceTwinReportState(&dt_diskCacheHits, dt_diskCacheHits.twinState);
-        dx_deviceTwinReportState(&dt_diskCacheMisses, dt_diskCacheMisses.twinState);
-        dx_deviceTwinReportState(&dt_diskTotalErrors, dt_diskTotalErrors.twinState);
-        dx_deviceTwinReportState(&dt_diskTotalWrites, dt_diskTotalWrites.twinState);
-        dx_deviceTwinReportState(&dt_reportedTemperature, &current_temperature);
+        dx_deviceTwinReportValue(&dt_diskCacheHits, dt_diskCacheHits.propertyValue);
+        dx_deviceTwinReportValue(&dt_diskCacheMisses, dt_diskCacheMisses.propertyValue);
+        dx_deviceTwinReportValue(&dt_diskTotalErrors, dt_diskTotalErrors.propertyValue);
+        dx_deviceTwinReportValue(&dt_diskTotalWrites, dt_diskTotalWrites.propertyValue);
+        dx_deviceTwinReportValue(&dt_reportedTemperature, &current_temperature);
     }
 }
 
@@ -401,9 +401,9 @@ static void connection_status_led_on_handler(EventLoopTimer *eventLoopTimer)
 
             // Update SoftwareVersion Device Twin
             snprintf(msgBuffer, sizeof(msgBuffer), "Altair on Sphere version: %s, DevX version: %s", ALTAIR_ON_AZURE_SPHERE_VERSION, AZURE_SPHERE_DEVX_VERSION);
-            dx_deviceTwinReportState(&dt_softwareVersion, msgBuffer);
+            dx_deviceTwinReportValue(&dt_softwareVersion, msgBuffer);
 
-            dx_deviceTwinReportState(&dt_reportedDeviceStartTime, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer))); // DX_TYPE_STRING
+            dx_deviceTwinReportValue(&dt_reportedDeviceStartTime, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer))); // DX_TYPE_STRING
             firstConnect = false;
         }
 

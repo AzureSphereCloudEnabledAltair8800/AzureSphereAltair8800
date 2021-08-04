@@ -124,18 +124,18 @@ static DX_TIMER_BINDING panel_refresh_timer = {.period = {0, 20 * OneMS}, .name 
 static DX_TIMER_BINDING watchdogMonitorTimer = {.period = {5, 0}, .name = "watchdogMonitorTimer", .handler = WatchdogMonitorTimerHandler};
 
 // Azure IoT Central Properties (Device Twins)
-DX_DEVICE_TWIN_BINDING dt_channelId = {.twinProperty = "DesiredChannelId", .twinType = DX_TYPE_INT, .handler = device_twin_set_channel_id_handler};
-DX_DEVICE_TWIN_BINDING dt_diskCacheHits = {.twinProperty = "DiskCacheHits", .twinType = DX_TYPE_INT};
-DX_DEVICE_TWIN_BINDING dt_diskCacheMisses = {.twinProperty = "DiskCacheMisses", .twinType = DX_TYPE_INT};
-DX_DEVICE_TWIN_BINDING dt_diskTotalErrors = {.twinProperty = "DiskTotalErrors", .twinType = DX_TYPE_INT};
-DX_DEVICE_TWIN_BINDING dt_diskTotalWrites = {.twinProperty = "DiskTotalWrites", .twinType = DX_TYPE_INT};
-static DX_DEVICE_TWIN_BINDING dt_desiredCpuState = {.twinProperty = "DesiredCpuState", .twinType = DX_TYPE_BOOL, .handler = device_twin_set_cpu_state_handler};
-static DX_DEVICE_TWIN_BINDING dt_desiredLedBrightness = {.twinProperty = "DesiredLedBrightness", .twinType = DX_TYPE_INT, .handler = device_twin_set_led_brightness_handler};
-static DX_DEVICE_TWIN_BINDING dt_desiredLocalSerial = {.twinProperty = "DesiredLocalSerial", .twinType = DX_TYPE_BOOL, .handler = device_twin_set_local_serial_handler};
-static DX_DEVICE_TWIN_BINDING dt_desiredTemperature = {.twinProperty = "DesiredTemperature", .twinType = DX_TYPE_INT, .handler = device_twin_set_temperature_handler};
-static DX_DEVICE_TWIN_BINDING dt_reportedDeviceStartTime = {.twinProperty = "ReportedDeviceStartTime", .twinType = DX_TYPE_STRING};
-static DX_DEVICE_TWIN_BINDING dt_reportedTemperature = {.twinProperty = "ReportedTemperature", .twinType = DX_TYPE_INT};
-static DX_DEVICE_TWIN_BINDING dt_softwareVersion = {.twinProperty = "SoftwareVersion", .twinType = DX_TYPE_STRING};
+DX_DEVICE_TWIN_BINDING dt_channelId = {.propertyName = "DesiredChannelId", .twinType = DX_DEVICE_TWIN_INT, .handler = device_twin_set_channel_id_handler};
+DX_DEVICE_TWIN_BINDING dt_diskCacheHits = {.propertyName = "DiskCacheHits", .twinType = DX_DEVICE_TWIN_INT};
+DX_DEVICE_TWIN_BINDING dt_diskCacheMisses = {.propertyName = "DiskCacheMisses", .twinType = DX_DEVICE_TWIN_INT};
+DX_DEVICE_TWIN_BINDING dt_diskTotalErrors = {.propertyName = "DiskTotalErrors", .twinType = DX_DEVICE_TWIN_INT};
+DX_DEVICE_TWIN_BINDING dt_diskTotalWrites = {.propertyName = "DiskTotalWrites", .twinType = DX_DEVICE_TWIN_INT};
+static DX_DEVICE_TWIN_BINDING dt_desiredCpuState = {.propertyName = "DesiredCpuState", .twinType = DX_DEVICE_TWIN_BOOL, .handler = device_twin_set_cpu_state_handler};
+static DX_DEVICE_TWIN_BINDING dt_desiredLedBrightness = {.propertyName = "DesiredLedBrightness", .twinType = DX_DEVICE_TWIN_INT, .handler = device_twin_set_led_brightness_handler};
+static DX_DEVICE_TWIN_BINDING dt_desiredLocalSerial = {.propertyName = "DesiredLocalSerial", .twinType = DX_DEVICE_TWIN_BOOL, .handler = device_twin_set_local_serial_handler};
+static DX_DEVICE_TWIN_BINDING dt_desiredTemperature = {.propertyName = "DesiredTemperature", .twinType = DX_DEVICE_TWIN_INT, .handler = device_twin_set_temperature_handler};
+static DX_DEVICE_TWIN_BINDING dt_reportedDeviceStartTime = {.propertyName = "ReportedDeviceStartTime", .twinType = DX_DEVICE_TWIN_STRING};
+static DX_DEVICE_TWIN_BINDING dt_reportedTemperature = {.propertyName = "ReportedTemperature", .twinType = DX_DEVICE_TWIN_INT};
+static DX_DEVICE_TWIN_BINDING dt_softwareVersion = {.propertyName = "SoftwareVersion", .twinType = DX_DEVICE_TWIN_STRING};
 
 // Azure IoT Central Commands (Direct Methods)
 static DX_DIRECT_METHOD_BINDING dm_restartDevice = {.methodName = "RestartDevice", .handler = RestartDeviceHandler};
