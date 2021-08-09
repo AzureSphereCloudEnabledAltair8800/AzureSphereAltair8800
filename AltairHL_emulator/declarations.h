@@ -34,7 +34,6 @@ static void *altair_thread(void *arg);
 static void connection_status_led_off_handler(EventLoopTimer *eventLoopTimer);
 static void connection_status_led_on_handler(EventLoopTimer *eventLoopTimer);
 static void device_twin_set_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
-static void intercore_disk_cache_receive_msg_handler(void *data_block, ssize_t message_length);
 static void intercore_environment_receive_msg_handler(void *data_block, ssize_t message_length);
 static void measure_sensor_handler(EventLoopTimer *eventLoopTimer);
 static void mqtt_dowork_handler(EventLoopTimer *eventLoopTimer);
@@ -60,7 +59,7 @@ DX_INTERCORE_BINDING intercore_environment_ctx = {.sockFd = -1,
 DX_INTERCORE_BINDING intercore_disk_cache_ctx = {.sockFd = -1,
                                                  .nonblocking_io = true,
                                                  .rtAppComponentId = CORE_DISK_CACHE_COMPONENT_ID,
-                                                 .interCoreCallback = intercore_disk_cache_receive_msg_handler,
+                                                 .interCoreCallback = NULL,
                                                  .intercore_recv_block = &intercore_disk_block,
                                                  .intercore_recv_block_length = sizeof(intercore_disk_block)};
 
