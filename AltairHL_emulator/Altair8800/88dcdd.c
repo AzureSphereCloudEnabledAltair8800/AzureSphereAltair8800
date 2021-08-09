@@ -18,8 +18,8 @@
 static VDISK_SECTOR_T vdisk_sector;
 static pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t intercore_disk_cond = PTHREAD_COND_INITIALIZER;
-static pthread_mutex_t intercore_disk_lock = PTHREAD_MUTEX_INITIALIZER;
+//static pthread_cond_t intercore_disk_cond = PTHREAD_COND_INITIALIZER;
+//static pthread_mutex_t intercore_disk_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static vdisk_mqtt_write_sector_t write_sector;
 static bool read_from_cache = false;
@@ -47,73 +47,48 @@ static void vdisk_cache_write_sector(uint8_t *sectorData, uint16_t sector_number
 
 static void vdisk_cache_read_sector(disk_t *pDisk)
 {
-    struct timespec now;
     read_from_cache = false;
     uint16_t requested_sector_number = (uint16_t)(pDisk->diskPointer / 137);
-
-    memset(&vdisk_sector, 0x00, sizeof(vdisk_sector));
 
     // prepare and send intercore message requesting offset from cache
     intercore_disk_block.disk_ic_msg_type = DISK_IC_READ;
     intercore_disk_block.sector_number = requested_sector_number;
+    intercore_disk_block.cached = false;
 
-    pthread_mutex_lock(&intercore_disk_lock);
-    // 3 bytes = msg type, uint16_t sector number
-    dx_intercorePublish(&intercore_disk_cache_ctx, &intercore_disk_block, 3);
+    if (!dx_intercorePublish(&intercore_disk_cache_ctx, &intercore_disk_block, 3)) {
+        // false will be return if the RT core app is not running
+        return;
+    }
 
-    clock_gettime(CLOCK_REALTIME, &now);
+    //// NOTE, the cache server on M4 must be compiled in released mode, optimised for speed to service read requests in time
+    //// measure using finish clock_gettime(CLOCK_MONOTONIC, &finish); - start clock_gettime(CLOCK_MONOTONIC, &start);
+    //// measurements were timed using release build with debugger attached for log_debug time stats
+    //// Measurements averaged over 1000 read requests from the cache
+    //// Average response time measured before request sent
+    //// Avg cache read response 208279 nanoseconds
+    //// Avg cache read response 211613 nanoseconds
+    //// Avg cache read response 210598 nanoseconds
+    //// Avg cache read response 211290 nanoseconds
 
-    // NOTE, the cache server on M4 must be compiled in released mode, optimised for speed to service read requests in time
-    // measure using finish clock_gettime(CLOCK_MONOTONIC, &finish); - start clock_gettime(CLOCK_MONOTONIC, &start);
-    // measurements were timed using release build with debugger attached for log_debug time stats
-    // Measurements averaged over 1000 read requests from the cache
-    // Average response time measured before request sent
-    // Avg cache read response 208279 nanoseconds
-    // Avg cache read response 211613 nanoseconds
-    // Avg cache read response 210598 nanoseconds
-    // Avg cache read response 211290 nanoseconds
+    //// Average response time measured after request sent
+    //// Avg cache read response 45421 nanoseconds
+    //// Avg cache read response 45469 nanoseconds
+    //// Avg cache read response 45774 nanoseconds
+    //// Avg cache read response 45781 nanoseconds
+    //// Avg cache read response 45772 nanoseconds
 
-    // Average response time measured after request sent
-    // Avg cache read response 45421 nanoseconds
-    // Avg cache read response 45469 nanoseconds
-    // Avg cache read response 45774 nanoseconds
-    // Avg cache read response 45781 nanoseconds
-    // Avg cache read response 45772 nanoseconds
+    if (dx_intercoreRead(&intercore_disk_cache_ctx) == -1) {
+        return;
+    }
 
-    now.tv_sec = 0;
-    now.tv_nsec += 500000; // 500 microseconds timeout
-
-    // wait for intercore message response
-    pthread_cond_timedwait(&intercore_disk_cond, &intercore_disk_lock, &now);
-    pthread_mutex_unlock(&intercore_disk_lock);
-
-    if (vdisk_sector.dirty) {
-        if (requested_sector_number != vdisk_sector.sector_number) {
-            (*(int *)dt_diskCacheMisses.propertyValue)++;
-        } else {
-            memcpy(pDisk->sectorData, vdisk_sector.data, SECTOR_SIZE);
-            pDisk->sectorPointer = 0;
-            read_from_cache = true;
-            (*(int *)dt_diskCacheHits.propertyValue)++;
-        }
+    if (intercore_disk_block.cached && intercore_disk_block.sector_number == requested_sector_number) {
+        memcpy(pDisk->sectorData, intercore_disk_block.sector, SECTOR_SIZE);
+        pDisk->sectorPointer = 0;
+        read_from_cache = true;
+        (*(int *)dt_diskCacheHits.propertyValue)++;
     } else {
         (*(int *)dt_diskCacheMisses.propertyValue)++;
     }
-}
-
-void vdisk_cache_response_cb(INTERCORE_DISK_DATA_BLOCK_T *intercore_disk_block)
-{
-    // uint16_t crc = cal_crc(intercore_disk_block->sector);
-
-    if (intercore_disk_block->cached) {
-        memcpy(vdisk_sector.data, intercore_disk_block->sector, 137);
-        vdisk_sector.sector_number = intercore_disk_block->sector_number;
-        vdisk_sector.dirty = true;
-    }
-
-    pthread_mutex_lock(&intercore_disk_lock);
-    pthread_cond_signal(&intercore_disk_cond);
-    pthread_mutex_unlock(&intercore_disk_lock);
 }
 
 void vdisk_mqtt_response_cb(uint8_t *sector)

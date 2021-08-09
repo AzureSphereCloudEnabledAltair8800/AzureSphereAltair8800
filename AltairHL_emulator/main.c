@@ -200,11 +200,6 @@ static void intercore_environment_receive_msg_handler(void *data_block, ssize_t 
     }
 }
 
-static void intercore_disk_cache_receive_msg_handler(void *data_block, ssize_t message_length)
-{
-    vdisk_cache_response_cb((INTERCORE_DISK_DATA_BLOCK_T *)data_block);
-}
-
 /// <summary>
 /// Device Twin Handler to set the desired temperature value
 /// </summary>
