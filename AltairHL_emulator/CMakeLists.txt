@@ -57,8 +57,8 @@ add_compile_definitions(IOT_HUB_POLL_TIME_NANOSECONDS=500000000)
 cmake_minimum_required (VERSION 3.10)
 project (AltairHL_emulator C)
 
-azsphere_configure_tools(TOOLS_REVISION "21.04")
-azsphere_configure_api(TARGET_API_SET "9")
+azsphere_configure_tools(TOOLS_REVISION "21.07")
+azsphere_configure_api(TARGET_API_SET "10")
 
 add_compile_definitions(ENABLE_WEB_TERMINAL)
 

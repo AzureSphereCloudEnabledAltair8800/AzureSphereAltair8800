@@ -26,7 +26,7 @@ cmake_minimum_required(VERSION 3.10)
 # Configurations
 project(AltairRT_enviromon C)
 
-azsphere_configure_tools(TOOLS_REVISION "21.01")
+azsphere_configure_tools(TOOLS_REVISION "21.07")
 add_compile_definitions(OSAI_BARE_METAL)
 add_compile_definitions(OSAI_ENABLE_DMA)
 
