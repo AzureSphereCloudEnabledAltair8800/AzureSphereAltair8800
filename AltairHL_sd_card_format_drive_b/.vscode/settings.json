@@ -24,5 +24,9 @@
         "titleBar.inactiveBackground": "#007fff99",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.color": "#007fff"
+    "peacock.color": "#007fff",
+    "AzureSphere.partnerApplications": {
+        "ac8d863a-4424-11eb-b378-0242ac130002": "c:\\Data\\Altair_8800\\AzureSphereAltair8800\\AltairHL_sd_card_format_drive_b\\app_manifest.json",
+        "005180bc-402f-4cb3-a662-72937dbcde47": ""
+    }
 }

@@ -209,7 +209,7 @@ static void button_a_handler(EventLoopTimer *eventLoopTimer)
     }
 
     if (dx_gpioStateGet(&gpio_button_a, &buttonAState)) {
-        write_drive("Disks/Empty.dsk", 1);
+        write_drive("Disks/blank.dsk", 1);
     }
 }
 

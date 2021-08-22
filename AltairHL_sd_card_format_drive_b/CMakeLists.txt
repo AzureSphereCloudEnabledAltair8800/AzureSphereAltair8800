@@ -84,4 +84,4 @@ if (SEEED_STUDIO_MINI)
     azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "../HardwareDefinitions/seeed_mt3620_mdb" TARGET_DEFINITION "azure_sphere_learning_path.json")
 endif(SEEED_STUDIO_MINI)
 
-azsphere_target_add_image_package(${PROJECT_NAME} RESOURCE_FILES  "Disks/Empty.dsk")
+azsphere_target_add_image_package(${PROJECT_NAME} RESOURCE_FILES  "Disks/blank.dsk")
