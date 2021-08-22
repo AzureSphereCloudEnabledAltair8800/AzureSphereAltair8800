@@ -19,3 +19,9 @@
 [submodule "azure-sphere-samples"]
 	path = azure-sphere-samples
 	url = https://github.com/Azure/azure-sphere-samples.git
+[submodule "AltairHL_sd_card_format/AzureSphereDevX"]
+	path = AltairHL_sd_card_format/AzureSphereDevX
+	url = https://github.com/gloveboxes/AzureSphereDevX.git
+[submodule "AltairRT_sd_card_server/lib"]
+	path = AltairRT_sd_card_server/lib
+	url = https://github.com/CodethinkLabs/mt3620-m4-drivers

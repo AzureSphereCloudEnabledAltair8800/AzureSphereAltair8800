@@ -18,6 +18,8 @@ set(ALTAIR_FRONT_PANEL_NONE TRUE "Altair on Azure Sphere with no panel.")
 #
 ###################################################################################################################
 
+add_compile_definitions(SD_CARD_ENABLED)
+
 # MQTT BROKER CONFIG ##############################################################################################
 #
 add_compile_definitions(ALTAIR_MQTT_HOST="test.mosquitto.org")
