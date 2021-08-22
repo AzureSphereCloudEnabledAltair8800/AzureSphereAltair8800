@@ -1,15 +1,5 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include "88dcdd.h"
-#include <sys/types.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
-#include <applibs/log.h>
-#include <string.h>
-#include "utils.h"
+
 
 #define DISK_DEBUG
 // #define DISK_DEBUG_VERBOSE
@@ -23,7 +13,7 @@ static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 static vdisk_mqtt_write_sector_t write_sector;
 static bool read_from_cache = false;
-static uint32_t sector_requested = __UINT32_MAX__;
+static uint32_t sector_requested = UINT32_MAX;
 
 //static uint16_t cal_crc(uint8_t *sector)
 //{
@@ -95,7 +85,7 @@ void vdisk_mqtt_response_cb(uint8_t *sector)
 {
     // first 4 bytes are the sector number in the response from the virtual disk server
     if (*(uint32_t *)(sector) == sector_requested) {
-        sector_requested = __UINT32_MAX__;
+        sector_requested = UINT32_MAX;
 
         pthread_mutex_lock(&lock);
 
@@ -461,7 +451,7 @@ uint8_t disk_read()
 #ifdef ARDUINO
     b = disk_drive.current->fp.read();
 #else
-    //bool result = false;
+    // bool result = false;
 
     if (disk_drive.currentDisk == 0) {
         int readval = read(disk_drive.current->fp, &b, (size_t)1);
@@ -470,9 +460,34 @@ uint8_t disk_read()
         }
         //#ifdef VDISK_TRACE
         //		uint32_t offset = lseek(disk_drive.current->fp, 0x00, SEEK_CUR);
-        //		Log_Debug("Read - [0x%02x] Disk %d: Track %d: Sector %d: Offset 0x%08lx\n", b, disk_drive.currentDisk, disk_drive.current->track, disk_drive.current->sector,
-        //offset); #endif
+        //		Log_Debug("Read - [0x%02x] Disk %d: Track %d: Sector %d: Offset 0x%08lx\n", b, disk_drive.currentDisk, disk_drive.current->track,
+        //disk_drive.current->sector, offset); #endif
     } else {
+#ifdef SD_CARD_ENABLED
+        if (!disk_drive.current->haveSectorData) {
+
+            disk_drive.current->sectorPointer = 0;
+
+            memset(intercore_disk_block.sector, 0x00, sizeof(intercore_disk_block.sector));
+            intercore_disk_block.cached = false;
+            intercore_disk_block.success = false;
+            intercore_disk_block.drive_number = 1;
+            intercore_disk_block.sector_number = (uint16_t)(disk_drive.current->diskPointer / 137);
+            intercore_disk_block.disk_ic_msg_type = DISK_IC_READ;
+            dx_intercorePublish(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
+
+            dx_intercoreRead(&intercore_sd_card_ctx);
+            if (intercore_disk_block.success) {
+                disk_drive.current->haveSectorData = true;
+                memcpy(disk_drive.current->sectorData, intercore_disk_block.sector, 137);
+            }
+
+            b = 0;
+        }
+        // b = disk_drive.current->sectorData[disk_drive.current->sectorPointer++];
+
+#else
+
         if (!disk_drive.current->haveSectorData) {
             disk_drive.current->haveSectorData = true;
             disk_drive.current->sectorPointer = 0;
@@ -481,6 +496,7 @@ uint8_t disk_read()
                 b = 0;
             }
         }
+#endif // SD_CARD_ENABLED
         b = disk_drive.current->sectorData[disk_drive.current->sectorPointer++];
 #ifdef VDISK_TRACE
         Log_Debug("Read - [0x%02x] Disk %d: Track %d: Sector %d: Offset 0x%08lx\n", b, disk_drive.currentDisk, disk_drive.current->track, disk_drive.current->sector,
@@ -517,7 +533,29 @@ uint8_t disk_read()
 
 void writeSector(disk_t *pDisk)
 {
+#ifdef SD_CARD_ENABLED
+
+    //Log_Debug("Writing: Sector: %d, bytes: %d\n", (pDisk->diskPointer / 137), disk_drive.current->sectorPointer);
+
+    memcpy(intercore_disk_block.sector, pDisk->sectorData, 137);
+    intercore_disk_block.cached = false;
+    intercore_disk_block.success = false;
+    intercore_disk_block.drive_number = 1;
+    intercore_disk_block.sector_number = (uint16_t)(disk_drive.current->diskPointer / 137);
+    intercore_disk_block.disk_ic_msg_type = DISK_IC_WRITE;
+    dx_intercorePublish(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
+
+    dx_intercoreRead(&intercore_sd_card_ctx);
+    //if (intercore_disk_block.success) {
+    //    Log_Debug("block written: %d\n", (uint16_t)(disk_drive.current->diskPointer / 137));
+    //} else {
+    //    Log_Debug("block NOT written\n");
+    //}
+
+#else
     write_virtual_sector(pDisk);
+
+#endif // SD_CARD_ENABLED
 
     pDisk->sectorPointer = 0;
     pDisk->sectorDirty = false;
