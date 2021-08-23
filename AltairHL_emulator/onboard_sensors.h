@@ -5,7 +5,7 @@
 #include <time.h>
 
 #ifdef OEM_AVNET
-#include "./Drivers/AVNET/HL/imu_temp_pressure.h"
+#include "../Drivers/AVNET/HL/imu_temp_pressure.h"
 #endif
 
 typedef struct {
