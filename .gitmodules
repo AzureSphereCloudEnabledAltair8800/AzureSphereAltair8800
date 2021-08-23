@@ -4,9 +4,6 @@
 [submodule "AltairRT_disk_cache_server/mt3620_m4_software"]
 	path = AltairRT_disk_cache_server/mt3620_m4_software
 	url = https://github.com/MediaTek-Labs/mt3620_m4_software.git
-[submodule "AltairRT_enviromon/mt3620_m4_software"]
-	path = AltairRT_enviromon/mt3620_m4_software
-	url = https://github.com/MediaTek-Labs/mt3620_m4_software.git
 [submodule "AltairHL_emulator/AzureSphereDevX"]
 	path = AltairHL_emulator/AzureSphereDevX
 	url = https://github.com/gloveboxes/AzureSphereDevX.git
