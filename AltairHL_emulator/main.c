@@ -39,7 +39,6 @@ DX_USER_CONFIG userConfig;
 
 #define BASIC_SAMPLES_DIRECTORY "BasicSamples"
 
-static float Temperature = 0.0; // storage for weather data
 static const char *AltairMsg = "\x1b[2J\r\nAzure Sphere - Altair 8800 Emulator\r\n";
 
 char msgBuffer[MSG_BUFFER_BYTES] = {0};
@@ -58,7 +57,6 @@ int console_fd = -1;
 
 const struct itimerspec watchdogInterval = {{60, 0}, {60, 0}};
 timer_t watchdogTimer;
-
 
 // basic app load helpers.
 static bool haveCtrlPending = false;
@@ -86,8 +84,6 @@ bool invoke_mqtt_sync = false;
 bool renderText = false;
 
 static char Log_Debug_Time_buffer[64];
-
-
 
 // End of variable declarations
 
@@ -184,20 +180,31 @@ static bool load_application(const char *fileName)
 }
 
 /// <summary>
-/// Callback handler for Inter-Core Messaging
+/// Set the temperature status led.
+/// Red if HVAC needs to be turned on to get to desired temperature.
+/// Blue to turn on cooler.
+/// Green equals just right, no action required.
 /// </summary>
-static void intercore_environment_receive_msg_handler(void *data_block, ssize_t message_length)
+void set_hvac_operating_mode(int temperature)
 {
-    INTERCORE_ENVIRONMENT_DATA_BLOCK_T *block = (INTERCORE_ENVIRONMENT_DATA_BLOCK_T *)data_block;
-
-    switch (block->ic_msg_type) {
-    case ALTAIR_IC_ENVIRONMENT:
-        current_environment.temperature = block->environment.temperature;
-        current_environment.pressure = block->environment.pressure;
-        break;
-    default:
-        break;
+    if (!dt_desiredTemperature.propertyUpdated || !onboard_telemetry.updated) {
+        return;
     }
+
+    onboard_telemetry.latest_operating_mode = temperature == *(int *)dt_desiredTemperature.propertyValue  ? HVAC_MODE_GREEN
+                                              : temperature > *(int *)dt_desiredTemperature.propertyValue ? HVAC_MODE_COOLING
+                                                                                                          : HVAC_MODE_HEATING;
+
+    if (onboard_telemetry.previous_operating_mode != onboard_telemetry.latest_operating_mode) {
+        // minus one as first item is HVAC_MODE_UNKNOWN
+        if (onboard_telemetry.previous_operating_mode != HVAC_MODE_UNKNOWN){
+            dx_gpioOff(ledRgb[onboard_telemetry.previous_operating_mode - 1]);
+        }
+        onboard_telemetry.previous_operating_mode = onboard_telemetry.latest_operating_mode;
+    }
+
+    // minus one as first item is HVAC_MODE_UNKNOWN
+    dx_gpioOn(ledRgb[onboard_telemetry.latest_operating_mode - 1]);
 }
 
 /// <summary>
@@ -206,12 +213,8 @@ static void intercore_environment_receive_msg_handler(void *data_block, ssize_t 
 static void device_twin_set_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
     // validate data is sensible range before applying
-    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_INT && *(int *)deviceTwinBinding->propertyValue >= -20 && *(int *)deviceTwinBinding->propertyValue <= 80) {
-        // Send the desired temperate to the real-time core enviromon app
-        intercore_send_block.ic_msg_type = ALTAIR_IC_THERMOSTAT;
-        intercore_send_block.environment.desired_temperature = *(int *)deviceTwinBinding->propertyValue;
-        dx_intercorePublish(&intercore_environment_ctx, &intercore_send_block, sizeof(INTERCORE_ENVIRONMENT_T));
-        // acknowledge the device twin
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_INT && IN_RANGE(*(int *)deviceTwinBinding->propertyValue, -20, 80)) {
+        set_hvac_operating_mode(onboard_telemetry.latest.temperature);
         dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
     } else {
         dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_ERROR);
@@ -219,7 +222,7 @@ static void device_twin_set_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTw
 }
 
 /// <summary>
-/// Read sensor and send to Azure IoT
+/// Read sensor and send to Azure IoT - called every 60 seconds
 /// </summary>
 static void measure_sensor_handler(EventLoopTimer *eventLoopTimer)
 {
@@ -228,19 +231,18 @@ static void measure_sensor_handler(EventLoopTimer *eventLoopTimer)
         return;
     }
     static uint8_t device_twin_update_rate = 0;
-    int current_temperature = (int)current_environment.temperature;
 
-    // Send request to RT Core for current environment data
-    intercore_send_block.ic_msg_type = ALTAIR_IC_ENVIRONMENT;
-    dx_intercorePublish(&intercore_environment_ctx, &intercore_send_block, sizeof(INTERCORE_ENVIRONMENT_T));
+    onboard_sensors_read(&onboard_telemetry.latest);
+    onboard_telemetry.updated = true;
+    set_hvac_operating_mode(onboard_telemetry.latest.temperature);
 
-    if (++device_twin_update_rate > 5) { // send every 6 updates = every 30 seconds
+    if (++device_twin_update_rate > 1) { // send every 2 updates = every 120 seconds
         device_twin_update_rate = 0;
         dx_deviceTwinReportValue(&dt_diskCacheHits, dt_diskCacheHits.propertyValue);
         dx_deviceTwinReportValue(&dt_diskCacheMisses, dt_diskCacheMisses.propertyValue);
         dx_deviceTwinReportValue(&dt_diskTotalErrors, dt_diskTotalErrors.propertyValue);
         dx_deviceTwinReportValue(&dt_diskTotalWrites, dt_diskTotalWrites.propertyValue);
-        dx_deviceTwinReportValue(&dt_reportedTemperature, &current_temperature);
+        dx_deviceTwinReportValue(&dt_reportedTemperature, &onboard_telemetry.latest.temperature);
     }
 }
 
@@ -432,47 +434,35 @@ static void mqtt_dowork_handler(EventLoopTimer *eventLoopTimer)
 
 static uint8_t sphere_port_in(uint8_t port)
 {
-    static bool readingTempData = false;
+    static bool reading_data = false;
     static char data[10];
     static int readPtr = 0;
     uint8_t retVal = 0;
 
-    if (port == 42) {
-        if (!readingTempData) {
-            readPtr = 0;
-            snprintf(data, 10, "%3.2f", Temperature);
-            readingTempData = true;
-        }
-
-        retVal = data[readPtr++];
-        if (retVal == 0x00) {
-            readingTempData = false;
-        }
-    }
-
     if (port == 43) {
-        if (!readingTempData) {
+        if (!reading_data) {
             readPtr = 0;
-            snprintf(data, 10, "%3.2f", current_environment.temperature);
-            readingTempData = true;
+            snprintf(data, 10, "%d", onboard_telemetry.latest.temperature);
+            publish_telemetry(onboard_telemetry.latest.temperature);
+            reading_data = true;
         }
 
         retVal = data[readPtr++];
         if (retVal == 0x00) {
-            readingTempData = false;
+            reading_data = false;
         }
     }
 
     if (port == 44) {
-        if (!readingTempData) {
+        if (!reading_data) {
             readPtr = 0;
-            snprintf(data, 10, "%4.1f ", current_environment.pressure);
-            readingTempData = true;
+            snprintf(data, 10, "%d", onboard_telemetry.latest.pressure);
+            reading_data = true;
         }
 
         retVal = data[readPtr++];
         if (retVal == 0x00) {
-            readingTempData = false;
+            reading_data = false;
         }
     }
     return retVal;
@@ -480,18 +470,18 @@ static uint8_t sphere_port_in(uint8_t port)
 
 static void sphere_port_out(uint8_t port, uint8_t data)
 {
+    static float temperature = 0.0;
     struct location_info *locData;
-    char *weatherData;
 
     // get IP and Weather data.
     if (port == 32 && data == 1) {
         locData = GetLocationData();
-        weatherData = GetCurrentWeather(locData, &Temperature);
+        GetCurrentWeather(locData, &temperature);
     }
 
     // publish the telemetry to IoTC
     if (port == 32 && data == 2) {
-        publish_telemetry(Temperature);
+        publish_telemetry((int)temperature);
     }
 }
 
@@ -739,6 +729,7 @@ static void InitPeripheralAndHandlers(void)
     dx_Log_Debug_Init(Log_Debug_Time_buffer, sizeof(Log_Debug_Time_buffer));
     curl_global_init(CURL_GLOBAL_DEFAULT);
     dx_gpioSetOpen(gpioSet, NELEMS(gpioSet));
+    dx_gpioSetOpen(ledRgb, NELEMS(ledRgb));
     init_altair_hardware();
 
 #ifndef ALTAIR_FRONT_PANEL_NONE
@@ -751,7 +742,10 @@ static void InitPeripheralAndHandlers(void)
     dx_timerSetStart(timerSet, NELEMS(timerSet));
     dx_directMethodSubscribe(directMethodBindingSet, NELEMS(directMethodBindingSet));
 
-    dx_intercoreConnect(&intercore_environment_ctx);
+    onboard_sensors_init();
+    onboard_sensors_read(&onboard_telemetry.latest);
+    onboard_telemetry.updated = true;
+
     dx_intercoreConnect(&intercore_disk_cache_ctx);
     dx_intercoreConnect(&intercore_sd_card_ctx);
 
@@ -771,6 +765,8 @@ static void ClosePeripheralAndHandlers(void)
     dx_directMethodUnsubscribe();
     dx_timerEventLoopStop();
     dx_gpioSetClose(gpioSet, NELEMS(gpioSet));
+    dx_gpioSetClose(ledRgb, NELEMS(ledRgb));
+    onboard_sensors_close();
     curl_global_cleanup();
 }
 

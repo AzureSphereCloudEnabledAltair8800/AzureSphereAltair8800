@@ -3,10 +3,6 @@
 
 #include "iotc_manager.h"
 
-static const char* msgTemplate = "{ \"Temperature\":%3.2f }";
-static const char* memoryTemplate = "{ \"TotalMemoryUsage\":%d,\"PeakUserModeMemoryUsage\":%d }";
-
-
 /// <summary>
 /// Device Twin Handler to set the desired temperature value
 /// </summary>
@@ -60,16 +56,18 @@ void memory_diagnostics_handler(EventLoopTimer* eventLoopTimer) {
 		return;
 	}
 
-	snprintf(msgBuffer, sizeof(msgBuffer), memoryTemplate,
-		Applications_GetTotalMemoryUsageInKB(),
-		Applications_GetPeakUserModeMemoryUsageInKB()
-	);
-	dx_azurePublish(msgBuffer, strlen(msgBuffer), NULL, 0, NULL);
+	if (dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 2,
+		DX_JSON_INT, "TotalMemoryUsage", Applications_GetTotalMemoryUsageInKB(),
+		DX_JSON_INT, "PeakUserModeMemoryUsage", Applications_GetPeakUserModeMemoryUsageInKB()))
+	{
+		dx_azurePublish(msgBuffer, strlen(msgBuffer), NULL, 0, NULL);
+	}
 }
 
-void publish_telemetry(float temperature) {
-	if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, temperature) > 0) {
-		//Log_Debug("%s\n", msgBuffer);
+void publish_telemetry(int temperature) {
+	if (dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 1,
+		DX_JSON_INT, "Temperature", temperature ))
+	{
 		dx_azurePublish(msgBuffer, strlen(msgBuffer), NULL, 0, NULL);
 	}
 }
