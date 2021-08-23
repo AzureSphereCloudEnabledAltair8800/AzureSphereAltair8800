@@ -35,6 +35,7 @@ static bool loadRomImage(char *romImageName, uint16_t loadAddress);
 static void *altair_thread(void *arg);
 static void connection_status_led_off_handler(EventLoopTimer *eventLoopTimer);
 static void connection_status_led_on_handler(EventLoopTimer *eventLoopTimer);
+static void device_stats_handler(EventLoopTimer *eventLoopTimer);
 static void device_twin_set_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 static void measure_sensor_handler(EventLoopTimer *eventLoopTimer);
 static void mqtt_dowork_handler(EventLoopTimer *eventLoopTimer);
@@ -56,8 +57,6 @@ typedef struct {
 
 ENVIRONMENT onboard_telemetry;
 
-INTERCORE_ENVIRONMENT_DATA_BLOCK_T intercore_send_block;
-INTERCORE_ENVIRONMENT_DATA_BLOCK_T intercore_recv_block;
 INTERCORE_DISK_DATA_BLOCK_T intercore_disk_block;
 
 DX_INTERCORE_BINDING intercore_disk_cache_ctx = {.sockFd = -1,
@@ -127,8 +126,9 @@ static DX_GPIO_BINDING azure_iot_connected_led = {
 DX_TIMER_BINDING restartDeviceOneShotTimer = {.period = {0, 0}, .name = "restartDeviceOneShotTimer", .handler = delay_restart_device_handler};
 static DX_TIMER_BINDING connectionStatusLedOffTimer = {.period = {0, 0}, .name = "connectionStatusLedOffTimer", .handler = connection_status_led_off_handler};
 static DX_TIMER_BINDING connectionStatusLedOnTimer = {.period = {0, 0}, .name = "connectionStatusLedOnTimer", .handler = connection_status_led_on_handler};
-static DX_TIMER_BINDING measure_sensor_timer = {.period = {60, 0}, .name = "measure_sensor_timer", .handler = measure_sensor_handler};
+static DX_TIMER_BINDING measure_sensor_timer = {.period = {30, 0}, .name = "measure_sensor_timer", .handler = measure_sensor_handler};
 static DX_TIMER_BINDING memory_diagnostics_timer = {.period = {60, 0}, .name = "memory_diagnostics_timer", .handler = memory_diagnostics_handler};
+static DX_TIMER_BINDING device_stats_timer = {.period = {45, 0}, .name = "memory_diagnostics_timer", .handler = device_stats_handler};
 static DX_TIMER_BINDING mqtt_do_work_timer = {.period = {0, 300 * OneMS}, .name = "mqtt_do_work_timer", .handler = mqtt_dowork_handler};
 static DX_TIMER_BINDING panel_refresh_timer = {.period = {0, 20 * OneMS}, .name = "panel_refresh_timer", .handler = panel_refresh_handler};
 static DX_TIMER_BINDING watchdogMonitorTimer = {.period = {5, 0}, .name = "watchdogMonitorTimer", .handler = WatchdogMonitorTimerHandler};
@@ -177,6 +177,7 @@ static DX_GPIO_BINDING *gpioSet[] = {&azure_iot_connected_led,
 static DX_TIMER_BINDING *timerSet[] = {&connectionStatusLedOnTimer,
                                        &connectionStatusLedOffTimer,
                                        &memory_diagnostics_timer,
+                                       &device_stats_timer,
                                        &measure_sensor_timer,
                                        &restartDeviceOneShotTimer,
                                        &mqtt_do_work_timer,
