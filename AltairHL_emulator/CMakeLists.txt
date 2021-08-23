@@ -1,6 +1,11 @@
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 #  Licensed under the MIT License.
 
+cmake_minimum_required (VERSION 3.10)
+project (AltairHL_emulator C)
+azsphere_configure_tools(TOOLS_REVISION "21.07")
+azsphere_configure_api(TARGET_API_SET "10")
+
 # SELECT DEVELOPER BOARD ##########################################################################################
 #
 set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")   
@@ -55,15 +60,15 @@ add_compile_definitions(IOT_HUB_POLL_TIME_NANOSECONDS=500000000)
 ###################################################################################################################
 
 
-cmake_minimum_required (VERSION 3.10)
-project (AltairHL_emulator C)
 
-azsphere_configure_tools(TOOLS_REVISION "21.07")
-azsphere_configure_api(TARGET_API_SET "10")
 
 add_compile_definitions(ENABLE_WEB_TERMINAL)
 
 add_subdirectory("AzureSphereDevX" out)
+
+if(AVNET OR AVNET_REV_2)
+    add_subdirectory("../Drivers/AVNET/HL" drivers)
+endif(AVNET OR AVNET_REV_2)
 
 if (MICRO_SD_CLICK)
     add_compile_definitions(SD_CARD_ENABLED)
@@ -119,6 +124,7 @@ set(Source
     "iotc_manager.c"
     "location_from_ip.c"
     "main.c"
+    "onboard_sensors.c"
     "storage.c"
     "utils.c"
     "weather.c"
@@ -150,6 +156,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC ../IntercoreContract)
 target_include_directories(${PROJECT_NAME} PUBLIC wolfMQTT wolfMQTT/wolfmqtt ./ )
 include_directories(${CMAKE_SOURCE_DIR} FrontPanels)
 include_directories(${CMAKE_SOURCE_DIR} Altair8800)
+
+if(AVNET OR AVNET_REV_2)
+    target_link_libraries (${PROJECT_NAME} avnet_drivers)
+    target_include_directories(${PROJECT_NAME} PUBLIC ../Drivers/AVNET/HL)
+endif(AVNET OR AVNET_REV_2)
 
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unknown-pragmas)
@@ -187,26 +198,27 @@ target_include_directories(${PROJECT_NAME} PUBLIC ../Drivers/CLICK_4x4_KEY_74HC1
 endif(ALTAIR_FRONT_PANEL_CLICK)
 
 
+if(ALTAIR_FRONT_PANEL_RETRO_CLICK)
+
 add_subdirectory("../Drivers/CLICK_8800_RETRO_AS1115" as1115_driver)
 include_directories(${PROJECT_NAME} ../Drivers/CLICK_8800_RETRO_AS1115)
 target_link_libraries(${PROJECT_NAME} as1115_driver)
 target_include_directories(${PROJECT_NAME} PUBLIC ../Drivers/CLICK_8800_RETRO_AS1115 )
 
-if(ALTAIR_FRONT_PANEL_RETRO_CLICK)
-
-
-
 endif(ALTAIR_FRONT_PANEL_RETRO_CLICK)
 
 if(AVNET)    
+    add_compile_definitions(OEM_AVNET)
     azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "../HardwareDefinitions/avnet_mt3620_sk" TARGET_DEFINITION "azure_sphere_learning_path.json")
 endif(AVNET)
 
 if(AVNET_REV_2)
+    add_compile_definitions(OEM_AVNET)
     azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "../HardwareDefinitions/avnet_mt3620_sk_rev2" TARGET_DEFINITION "azure_sphere_learning_path.json")
 endif(AVNET_REV_2)
 
-if (SEEED_STUDIO_RDB)    
+if (SEEED_STUDIO_RDB)   
+    add_compile_definitions(OEM_SEEED_STUDIO)
     azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "../HardwareDefinitions/mt3620_rdb" TARGET_DEFINITION "azure_sphere_learning_path.json")
 endif()
 

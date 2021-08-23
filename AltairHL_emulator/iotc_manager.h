@@ -38,4 +38,4 @@ void device_twin_set_cpu_state_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding
 void device_twin_set_led_brightness_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 void device_twin_set_local_serial_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 void memory_diagnostics_handler(EventLoopTimer* eventLoopTimer);
-void publish_telemetry(float temperature);
+void publish_telemetry(int temperature);

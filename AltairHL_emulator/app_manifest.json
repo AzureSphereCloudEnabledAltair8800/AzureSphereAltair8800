@@ -14,7 +14,10 @@
       "$LED_STORE",
       "$LED_OUTPUT_ENABLE",
       "$BUTTON_A",
-      "$BUTTON_B"
+      "$BUTTON_B",
+      "$LED_RED",
+      "$LED_GREEN",
+      "$LED_BLUE"
     ],
     "Uart": [ "$MT3620_ISU3_UART" ],
     "SpiMaster": [ "$MT3620_ISU1_SPI" ],

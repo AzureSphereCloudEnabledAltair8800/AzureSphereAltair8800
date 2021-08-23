@@ -16,16 +16,9 @@ $upload_image = azsphere image add --image $global:altair_disk_cache_image_path_
 # This is where you'll find the image id in the image upload return string
 $altair_disk_cache_image_id = $upload_image.Split(">").Trim()[2].split(":")[1].Trim()
 
-
-# Upload RT Enviroment Monitor
-$upload_image = azsphere image add --image $global:altair_enviromon_image_path_filename -t $tenant_id
-# This is where you'll find the image id in the image upload return string
-$altair_enviromon_image_id = $upload_image.Split(">").Trim()[2].split(":")[1].Trim()
-
-
 write-host "`nCreating deployment for device group id: $device_group on tenant id: $tenant_id for image id: $image_id"
 
-azsphere device-group deployment create --device-group $device_group --images $altair_emulator_image_id $altair_disk_cache_image_id $altair_enviromon_image_id -t $tenant_id
+azsphere device-group deployment create --device-group $device_group --images $altair_emulator_image_id $altair_disk_cache_image_id -t $tenant_id
 
 write-host "`nList of all images for device group id: $device_group on tenant id: $tenant_id"
 
