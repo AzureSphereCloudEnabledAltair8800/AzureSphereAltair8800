@@ -9,12 +9,13 @@ set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")
 #
 ###################################################################################################################
 
-# SELECT FRONT PANEL CONFIG #######################################################################################
+# ALTAIR CONFIG ###################################################################################################
 #
 set(ALTAIR_FRONT_PANEL_NONE TRUE "Altair on Azure Sphere with no panel.")
 # set(ALTAIR_FRONT_PANEL_KIT TRUE "Altair front panel board")
 # set(ALTAIR_FRONT_PANEL_CLICK TRUE "Avnet with the 4x4 keypad Click and  8x8 LED Click")
 # set(ALTAIR_FRONT_PANEL_RETRO_CLICK TRUE "Avnet with Altair 8800 Retro Click")
+# set(MICRO_SD_CLICK TRUE "MikroE microSD Click for CP/M read/write to SD Card")
 #
 ###################################################################################################################
 
@@ -63,6 +64,10 @@ azsphere_configure_api(TARGET_API_SET "10")
 add_compile_definitions(ENABLE_WEB_TERMINAL)
 
 add_subdirectory("AzureSphereDevX" out)
+
+if (MICRO_SD_CLICK)
+    add_compile_definitions(SD_CARD_ENABLED)
+endif (MICRO_SD_CLICK)
 
 if (ALTAIR_FRONT_PANEL_KIT)
 

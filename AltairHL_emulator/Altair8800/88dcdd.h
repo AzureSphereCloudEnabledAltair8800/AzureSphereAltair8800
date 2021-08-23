@@ -6,10 +6,19 @@
 #include "dx_intercore.h"
 #include "intercore_contract.h"
 #include "types.h"
+#include "utils.h"
+#include <applibs/log.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-extern DX_INTERCORE_BINDING intercore_disk_cache_ctx;
-extern INTERCORE_DISK_DATA_BLOCK_T intercore_disk_block;
 extern DX_DEVICE_TWIN_BINDING dt_diskCacheHits;
 extern DX_DEVICE_TWIN_BINDING dt_diskCacheMisses;
 extern DX_DEVICE_TWIN_BINDING dt_diskTotalWrites;
@@ -58,6 +67,7 @@ typedef struct
 } disks;
 
 extern disks disk_drive;
+extern DX_INTERCORE_BINDING intercore_sd_card_ctx;
 extern DX_INTERCORE_BINDING intercore_disk_cache_ctx;
 extern INTERCORE_DISK_DATA_BLOCK_T intercore_disk_block;
 

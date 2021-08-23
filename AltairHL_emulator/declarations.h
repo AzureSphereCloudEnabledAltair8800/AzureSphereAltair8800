@@ -28,6 +28,7 @@
 
 #define CORE_ENVIRONMENT_COMPONENT_ID "2e319eae-7be5-4a0c-ba47-9353aa6ca96a"
 #define CORE_DISK_CACHE_COMPONENT_ID "9b684af8-21b9-42aa-91e4-621d5428e497"
+#define CORE_SD_CARD_COMPONENT_ID "005180bc-402f-4cb3-a662-72937dbcde47"
 
 static bool loadRomImage(char *romImageName, uint16_t loadAddress);
 static void *altair_thread(void *arg);
@@ -62,6 +63,13 @@ DX_INTERCORE_BINDING intercore_disk_cache_ctx = {.sockFd = -1,
                                                  .interCoreCallback = NULL,
                                                  .intercore_recv_block = &intercore_disk_block,
                                                  .intercore_recv_block_length = sizeof(intercore_disk_block)};
+
+DX_INTERCORE_BINDING intercore_sd_card_ctx = {.sockFd = -1,
+                                              .nonblocking_io = false,
+                                              .rtAppComponentId = CORE_SD_CARD_COMPONENT_ID,
+                                              .interCoreCallback = NULL,
+                                              .intercore_recv_block = &intercore_disk_block,
+                                              .intercore_recv_block_length = sizeof(intercore_disk_block)};
 
 #ifdef ALTAIR_FRONT_PANEL_CLICK
 

@@ -753,6 +753,7 @@ static void InitPeripheralAndHandlers(void)
 
     dx_intercoreConnect(&intercore_environment_ctx);
     dx_intercoreConnect(&intercore_disk_cache_ctx);
+    dx_intercoreConnect(&intercore_sd_card_ctx);
 
     dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 400 * OneMS});
     dx_startThreadDetached(altair_thread, NULL, "altair_thread");

@@ -19,15 +19,11 @@ typedef struct  __attribute__((packed)) {
 	int desired_temperature;
 } INTERCORE_ENVIRONMENT_T;
 
-// Note the Intercore framework expect the first 2 bytes to be control informationm
-// The first 2 bytes must be the msg_type and reserved.
-// Note reserved is for general purpose use should the msg_type not be descriptive enough
 typedef struct  __attribute__((packed)) {
 	INTERCORE_MSG_TYPE ic_msg_type;
 	uint8_t reserved;	// Must be included in message and reserved for future use
 	INTERCORE_ENVIRONMENT_T environment;
 } INTERCORE_ENVIRONMENT_DATA_BLOCK_T;
-
 
 typedef enum  __attribute__((packed)) {
 	DISK_IC_UNKNOWN,
@@ -39,5 +35,7 @@ typedef struct  __attribute__((packed, aligned(4))) {
 	INTERCORE_DISK_MSG_TYPE disk_ic_msg_type;
 	uint16_t sector_number;
 	bool cached;
+	bool success;
+	uint8_t drive_number;
 	uint8_t sector[137];
 } INTERCORE_DISK_DATA_BLOCK_T;

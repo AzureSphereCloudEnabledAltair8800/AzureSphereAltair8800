@@ -18,6 +18,7 @@
     ],
     "Uart": [ "$MT3620_ISU3_UART" ],
     "SpiMaster": [ "$MT3620_ISU1_SPI" ],
+    "I2cMaster": [ "$ISU2" ],
     "PowerControls": [ "ForceReboot" ],
     "AllowedConnections": [
       "global.azure-devices-provisioning.net",
@@ -30,7 +31,8 @@
     "DeviceAuthentication": "REPLACE_WITH_YOUR_AZURE_SPHERE_TENANT_ID",
     "AllowedApplicationConnections": [
       "2e319eae-7be5-4a0c-ba47-9353aa6ca96a",
-      "9b684af8-21b9-42aa-91e4-621d5428e497"
+      "9b684af8-21b9-42aa-91e4-621d5428e497",
+      "005180bc-402f-4cb3-a662-72937dbcde47"
     ]
   },
   "ApplicationType": "Default"
