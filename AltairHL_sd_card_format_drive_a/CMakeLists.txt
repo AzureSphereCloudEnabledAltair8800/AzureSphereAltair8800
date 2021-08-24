@@ -9,15 +9,15 @@
 
 # If you are NOT using the AVNET Revision 1 board be sure to comment out the AVNET board
 
-set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")    
-# set(AVNET_REV_2 TRUE "AVNET Azure Sphere Starter Kit Revision 2 ")             
+# set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")    
+set(AVNET_REV_2 TRUE "AVNET Azure Sphere Starter Kit Revision 2 ")             
 # set(SEEED_STUDIO_RDB TRUE "Seeed Studio Azure Sphere MT3620 Development Kit (aka Reference Design Board or rdb)")
 # set(SEEED_STUDIO_MINI TRUE "Seeed Studio Azure Sphere MT3620 Mini Dev Board")
 
 ###################################################################################################################
 
 cmake_minimum_required (VERSION 3.10)
-project (AzureSphereAzureIoT C)
+project (AltairHL_sd_card_format_a C)
 
 azsphere_configure_tools(TOOLS_REVISION "21.07")
 azsphere_configure_api(TARGET_API_SET "10")
