@@ -18,13 +18,13 @@ set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")
 #
 set(ALTAIR_FRONT_PANEL_NONE TRUE "Altair on Azure Sphere with no panel.")
 # set(ALTAIR_FRONT_PANEL_KIT TRUE "Altair front panel board")
-# set(ALTAIR_FRONT_PANEL_CLICK TRUE "Avnet with the 4x4 keypad Click and  8x8 LED Click")
-# set(ALTAIR_FRONT_PANEL_RETRO_CLICK TRUE "Avnet with Altair 8800 Retro Click")
+# set(ALTAIR_FRONT_PANEL_CLICK TRUE "Avnet with the MikroE 4x4 keypad Click and MikroE 8x8 LED Click")
+# set(ALTAIR_FRONT_PANEL_RETRO_CLICK TRUE "Avnet with the MikroE Altair 8800 Retro Click")
 
 # ENABLE SD CARD ##################################################################################################
 #
-# The Mikroe microSD Card only works with the Avnet Rev 2 when in Socket 1.
-# The Mikroe microSD Card works with the Mikroe Altair 8800 Retro Click in Socket 2
+# The MikroE microSD Click only works with the Avnet Rev 2 when in Socket 1.
+# The MikroE microSD Click works with the Mikroe Altair 8800 Retro Click in Socket 2
 #
 # set(MICRO_SD_CLICK TRUE "MikroE microSD Click for CP/M read/write to SD Card")
 #
