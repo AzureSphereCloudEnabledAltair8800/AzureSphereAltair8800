@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <applibs/log.h>
 
+#ifdef PRINTF
+#undef PRINTF
+#endif // PRINTF
+
 #define PRINTF Log_Debug
 
 typedef unsigned short word16;

@@ -25,7 +25,7 @@
 #include "sphere_panel.h"
 #include "memory.h"
 
-#include "declarations.h"
+#include "main.h"
 
 #define ALTAIR_ON_AZURE_SPHERE_VERSION "3.0"
 
@@ -116,6 +116,20 @@ void SetupWatchdog(void) {
 	}
 }
 
+/// <summary>
+/// Report on first connect the software version and device startup UTC time
+/// </summary>
+/// <param name="connected"></param>
+static void azure_connection_changed(bool connected) {
+    static bool first_time_only = true;
+    if (first_time_only) {
+        first_time_only = false;
+        snprintf(msgBuffer, sizeof(msgBuffer), "Altair emulator version: %s, DevX version: %s", ALTAIR_ON_AZURE_SPHERE_VERSION, AZURE_SPHERE_DEVX_VERSION);
+        dx_deviceTwinReportValue(&dt_softwareVersion, msgBuffer);
+        dx_deviceTwinReportValue(&dt_reportedDeviceStartTime, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer))); // DX_TYPE_STRING
+	}
+}
+
 static void mqtt_connected_cb(void) {
 	static bool connection_initialised = false;
 	static const char* connected_message = "\r\nCONNECTED TO AZURE SPHERE ALTAIR 8800 EMULATOR VERSION: %s, DevX VERSION: %s.\r\n\r\n";
@@ -137,6 +151,11 @@ static void mqtt_connected_cb(void) {
 	}
 }
 
+/// <summary>
+/// Load sample BASIC applications
+/// </summary>
+/// <param name="fileName"></param>
+/// <returns></returns>
 static bool load_application(const char* fileName) {
 	char filePathAndName[50];
 	snprintf(filePathAndName, sizeof(filePathAndName), "%s/%s", BASIC_SAMPLES_DIRECTORY, fileName);
@@ -368,10 +387,18 @@ static void handle_inbound_message(const char* topic_name, size_t topic_name_siz
 	}
 }
 
+/// <summary>
+/// MQTT recieved message callback
+/// </summary>
+/// <param name="msg"></param>
 static void publish_callback_wolf(MqttMessage* msg) {
 	handle_inbound_message(msg->topic_name, msg->topic_name_len, msg->buffer, msg->buffer_len);
 }
 
+/// <summary>
+/// Connection status led blink off oneshot timer callback
+/// </summary>
+/// <param name="eventLoopTimer"></param>
 static void connection_status_led_off_handler(EventLoopTimer* eventLoopTimer) {
 	if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
 		dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
@@ -381,11 +408,10 @@ static void connection_status_led_off_handler(EventLoopTimer* eventLoopTimer) {
 }
 
 /// <summary>
-/// Flash LEDs timer handler
+/// Blink LEDs timer handler
 /// </summary>
 static void connection_status_led_on_handler(EventLoopTimer* eventLoopTimer) {
 	static int init_sequence = 25;
-	static bool firstConnect = true;
 
 	if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
 		dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
@@ -406,17 +432,6 @@ static void connection_status_led_on_handler(EventLoopTimer* eventLoopTimer) {
 		dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){5, 0});
 		dx_timerOneShotSet(&connectionStatusLedOffTimer, &(struct timespec){4, 800 * OneMS});
 
-		// Update device start time device twin
-		if (firstConnect && dx_isAzureConnected()) {
-
-			// Update SoftwareVersion Device Twin
-			snprintf(msgBuffer, sizeof(msgBuffer), "Altair on Sphere version: %s, DevX version: %s", ALTAIR_ON_AZURE_SPHERE_VERSION, AZURE_SPHERE_DEVX_VERSION);
-			dx_deviceTwinReportValue(&dt_softwareVersion, msgBuffer);
-
-			dx_deviceTwinReportValue(&dt_reportedDeviceStartTime, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer))); // DX_TYPE_STRING
-			firstConnect = false;
-		}
-
 	} else if (dx_isNetworkReady()) {
 
 		dx_gpioOn(&azure_iot_connected_led);
@@ -433,6 +448,10 @@ static void connection_status_led_on_handler(EventLoopTimer* eventLoopTimer) {
 	}
 }
 
+/// <summary>
+/// MQTT Dowork timer callback
+/// </summary>
+/// <param name="eventLoopTimer"></param>
 static void mqtt_dowork_handler(EventLoopTimer* eventLoopTimer) {
 	if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
 		dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
@@ -442,8 +461,16 @@ static void mqtt_dowork_handler(EventLoopTimer* eventLoopTimer) {
 	if (dirty_buffer) {
 		send_messages = true;
 	}
+
+    dx_timerOneShotSet(&mqtt_do_work_timer, &(struct timespec){0, 300 * OneMS});
 }
 
+/// <summary>
+/// Support for BASIC Port In for IOT.BAS temperature and pressure example
+/// Example shows environment temperature and pressure example
+/// </summary>
+/// <param name="port"></param>
+/// <returns></returns>
 static uint8_t sphere_port_in(uint8_t port) {
 	static bool reading_data = false;
 	static char data[10];
@@ -454,7 +481,7 @@ static uint8_t sphere_port_in(uint8_t port) {
 		if (!reading_data) {
 			readPtr = 0;
 			snprintf(data, 10, "%d", onboard_telemetry.latest.temperature);
-			publish_telemetry(onboard_telemetry.latest.temperature);
+			publish_telemetry(onboard_telemetry.latest.temperature, onboard_telemetry.latest.pressure);
 			reading_data = true;
 		}
 
@@ -479,6 +506,11 @@ static uint8_t sphere_port_in(uint8_t port) {
 	return retVal;
 }
 
+/// <summary>
+/// BASIC Port Out for weather.bas
+/// </summary>
+/// <param name="port"></param>
+/// <param name="data"></param>
 static void sphere_port_out(uint8_t port, uint8_t data) {
 	static float temperature = 0.0;
 	struct location_info* locData;
@@ -491,7 +523,7 @@ static void sphere_port_out(uint8_t port, uint8_t data) {
 
 	// publish the telemetry to IoTC
 	if (port == 32 && data == 2) {
-		publish_telemetry((int)temperature);
+		publish_telemetry((int)temperature, 1010);
 	}
 }
 
@@ -735,7 +767,10 @@ static void InitPeripheralAndHandlers(void) {
 #endif // !ALTAIR_FRONT_PANEL_NONE
 
 	dx_azureConnect(&userConfig, NETWORK_INTERFACE, IOT_PLUG_AND_PLAY_MODEL_ID);
-	init_mqtt(publish_callback_wolf, mqtt_connected_cb);
+    dx_azureRegisterConnectionChangedNotification(azure_connection_changed);
+
+	init_mqtt(publish_callback_wolf, mqtt_connected_cb);   
+
 	dx_deviceTwinSubscribe(deviceTwinBindingSet, NELEMS(deviceTwinBindingSet));
 	dx_timerSetStart(timerSet, NELEMS(timerSet));
 	dx_directMethodSubscribe(directMethodBindingSet, NELEMS(directMethodBindingSet));
@@ -747,7 +782,8 @@ static void InitPeripheralAndHandlers(void) {
 	dx_intercoreConnect(&intercore_disk_cache_ctx);
 	dx_intercoreConnect(&intercore_sd_card_ctx);
 
-	dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 400 * OneMS});
+	dx_timerOneShotSet(&mqtt_do_work_timer, &(struct timespec){1, 0});
+	dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 0});
 	dx_startThreadDetached(altair_thread, NULL, "altair_thread");
 
 	SetupWatchdog();

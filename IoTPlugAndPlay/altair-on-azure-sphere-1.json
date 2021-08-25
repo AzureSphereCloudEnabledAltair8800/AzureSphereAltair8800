@@ -57,8 +57,20 @@
         "en": "Temperature"
       },
       "name": "Temperature",
-      "schema": "float",
+      "schema": "integer",
       "unit": "degreeCelsius"
+    },
+    {
+      "@type": [
+        "Telemetry",
+        "Pressure"
+      ],
+      "displayName": {
+        "en": "Pressure"
+      },
+      "name": "Pressure",
+      "schema": "integer",
+      "unit": "millibar"
     },
     {
       "@type": "Telemetry",
@@ -117,6 +129,14 @@
       },
       "name": "ReportedDeviceStartTime",
       "schema": "dateTime"
+    },
+    {
+      "@type": "Property",
+      "displayName": {
+        "en": "Software version"
+      },
+      "name": "SoftwareVersion",
+      "schema": "string"
     },
     {
       "@type": "Property",

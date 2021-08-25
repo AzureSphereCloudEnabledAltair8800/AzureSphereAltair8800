@@ -64,9 +64,10 @@ void memory_diagnostics_handler(EventLoopTimer* eventLoopTimer) {
 	}
 }
 
-void publish_telemetry(int temperature) {
-	if (dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 1,
-		DX_JSON_INT, "Temperature", temperature ))
+void publish_telemetry(int temperature, int pressure) {
+	if (dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 2,
+		DX_JSON_INT, "Temperature", temperature, 
+		DX_JSON_INT, "Pressure", pressure))
 	{
 		dx_azurePublish(msgBuffer, strlen(msgBuffer), NULL, 0, NULL);
 	}
