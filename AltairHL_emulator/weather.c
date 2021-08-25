@@ -51,6 +51,7 @@ char* GetCurrentWeather(struct location_info* locationInfo, float *Temperature)
 {
 	JSON_Value* rootProperties = NULL;
 	*Temperature = 0.0;
+    double temp = 0.0;
 
 	memset(weatherInfo, 0x00, 80);
 	// if we don't have network, then return empty string.
@@ -92,10 +93,7 @@ char* GetCurrentWeather(struct location_info* locationInfo, float *Temperature)
 	/* Perform the request */
 	res = curl_easy_perform(curl);
 
-
 	Log_Debug("Curl completed\n");
-
-	double temp = 0.0;
 
 	if (res == CURLE_OK)
 	{
