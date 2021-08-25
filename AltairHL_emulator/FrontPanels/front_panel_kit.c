@@ -28,7 +28,7 @@ bool init_altair_hardware(void) {
 	init_console();
 
 	SPIMaster_Config config;
-	int ret = SPIMaster_InitConfig(&config);
+	SPIMaster_InitConfig(&config);
 
 	config.csPolarity = SPI_ChipSelectPolarity_ActiveLow;
 	altair_spi_fd = SPIMaster_Open(MT3620_ISU1_SPI, MT3620_SPI_CS_A, &config);
@@ -73,7 +73,7 @@ void read_switches(uint16_t* address, uint8_t* cmd) {
 
 		*address = out & 0xffff;
 		*address = reverse_lut[(*address & 0xf000) >> 12] << 8 | reverse_lut[(*address & 0x0f00) >> 8] << 12 | reverse_lut[(*address & 0xf0) >> 4] | reverse_lut[*address & 0xf] << 4;
-		*address = ~*address;
+        *address = (uint16_t)~*address;
 	} else {
 		dx_terminate(APP_EXIT_SEEED_SPI_TRANSFER);
 	}
@@ -113,7 +113,7 @@ void update_panel_status_leds(uint8_t status, uint8_t data, uint16_t bus) {
 	SPIMaster_InitTransfers(&transfer, 1);
 	transfer.flags = SPI_TransferFlags_Write;
 	transfer.length = 4;
-	transfer.writeData = &out;
+    transfer.writeData = (const uint8_t *)&out;
 
 	ssize_t numWrite = SPIMaster_TransferSequential(altair_spi_fd, &transfer, 1);
 	if (numWrite != transfer.length) {
