@@ -74,7 +74,7 @@ add_compile_definitions(ENABLE_WEB_TERMINAL)
 add_subdirectory("AzureSphereDevX" out)
 
 if(AVNET OR AVNET_REV_2)
-    add_subdirectory("../Drivers/AVNET/HL" drivers)
+    add_subdirectory("Drivers/AVNET/HL" drivers)
 endif(AVNET OR AVNET_REV_2)
 
 if (MICRO_SD_CLICK)
@@ -166,7 +166,7 @@ include_directories(${CMAKE_SOURCE_DIR} Altair8800)
 
 if(AVNET OR AVNET_REV_2)
     target_link_libraries (${PROJECT_NAME} avnet_drivers)
-    target_include_directories(${PROJECT_NAME} PUBLIC ../Drivers/AVNET/HL)
+    target_include_directories(${PROJECT_NAME} PUBLIC Drivers/AVNET/HL)
 endif(AVNET OR AVNET_REV_2)
 
 
@@ -192,25 +192,25 @@ set_source_files_properties(wolfMQTT/wolfmqtt/mqtt_packet.h PROPERTIES COMPILE_F
 
 if(ALTAIR_FRONT_PANEL_CLICK)
 
-add_subdirectory("../Drivers/CLICK_8x8_LED_MAX7219" max7219_driver)
-include_directories(${CMAKE_SOURCE_DIR} ../Drivers/CLICK_8x8_LED_MAX7219)
+add_subdirectory("Drivers/CLICK_8x8_LED_MAX7219" max7219_driver)
+include_directories(${CMAKE_SOURCE_DIR} Drivers/CLICK_8x8_LED_MAX7219)
 target_link_libraries(${PROJECT_NAME} max7219_driver)
-target_include_directories(${PROJECT_NAME} PUBLIC ../Drivers/CLICK_8x8_LED_MAX7219 )
+target_include_directories(${PROJECT_NAME} PUBLIC Drivers/CLICK_8x8_LED_MAX7219 )
 
-add_subdirectory("../Drivers/CLICK_4x4_KEY_74HC165" 74HC165_driver)
-include_directories(${CMAKE_SOURCE_DIR} ../Drivers/CLICK_4x4_KEY_74HC165)
+add_subdirectory("Drivers/CLICK_4x4_KEY_74HC165" 74HC165_driver)
+include_directories(${CMAKE_SOURCE_DIR} Drivers/CLICK_4x4_KEY_74HC165)
 target_link_libraries(${PROJECT_NAME} 74HC165_driver)
-target_include_directories(${PROJECT_NAME} PUBLIC ../Drivers/CLICK_4x4_KEY_74HC165 )
+target_include_directories(${PROJECT_NAME} PUBLIC Drivers/CLICK_4x4_KEY_74HC165 )
 
 endif(ALTAIR_FRONT_PANEL_CLICK)
 
 
 if(ALTAIR_FRONT_PANEL_RETRO_CLICK)
 
-add_subdirectory("../Drivers/CLICK_8800_RETRO_AS1115" as1115_driver)
-include_directories(${PROJECT_NAME} ../Drivers/CLICK_8800_RETRO_AS1115)
+add_subdirectory("Drivers/CLICK_8800_RETRO_AS1115" as1115_driver)
+include_directories(${PROJECT_NAME} Drivers/CLICK_8800_RETRO_AS1115)
 target_link_libraries(${PROJECT_NAME} as1115_driver)
-target_include_directories(${PROJECT_NAME} PUBLIC ../Drivers/CLICK_8800_RETRO_AS1115 )
+target_include_directories(${PROJECT_NAME} PUBLIC Drivers/CLICK_8800_RETRO_AS1115 )
 
 endif(ALTAIR_FRONT_PANEL_RETRO_CLICK)
 

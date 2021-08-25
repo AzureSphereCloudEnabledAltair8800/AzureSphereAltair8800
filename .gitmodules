@@ -7,9 +7,6 @@
 [submodule "AltairHL_emulator/AzureSphereDevX"]
 	path = AltairHL_emulator/AzureSphereDevX
 	url = https://github.com/gloveboxes/AzureSphereDevX.git
-[submodule "Drivers"]
-	path = Drivers
-	url = https://github.com/gloveboxes/AzureSphereDrivers.git
 [submodule "AltairHL_emulator/Disks"]
 	path = AltairHL_emulator/Disks
 	url = https://github.com/AzureSphereCloudEnabledAltair8800/AzureSphereAltair8800.disks.git
@@ -31,4 +28,6 @@
 [submodule "AltairHL_sd_card_format_drive_b/Disks"]
 	path = AltairHL_sd_card_format_drive_b/Disks
 	url = https://github.com/AzureSphereCloudEnabledAltair8800/AzureSphereAltair8800.disks.git
-
+[submodule "AltairHL_emulator/Drivers"]
+	path = AltairHL_emulator/Drivers
+	url = https://github.com/gloveboxes/AzureSphereDrivers.git
