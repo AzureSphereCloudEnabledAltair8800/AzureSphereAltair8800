@@ -713,10 +713,17 @@ static void* altair_thread(void* arg) {
 	disk_controller.write = disk_write;
 	disk_controller.sector = sector;
 
+#ifndef SD_CARD_ENABLED
 	disk_drive.disk1.fp = Storage_OpenFileInImagePackage("Disks/cpm63k.dsk");
 	if (disk_drive.disk1.fp == -1) {
 		Log_Debug("Failed to load CPM Disk\n");
 	}
+#else
+    disk_drive.disk1.fp = -1;
+    disk_drive.disk1.diskPointer = 0;
+    disk_drive.disk1.sector = 0;
+    disk_drive.disk1.track = 0;
+#endif
 
 	// drive 2 is virtual (Python Server or MQTT Server).
 	disk_drive.disk2.fp = -1;
