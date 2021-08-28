@@ -205,13 +205,14 @@ void disk_function(uint8_t b)
 
         uint32_t seek_offset = TRACK * disk_drive.current->track;
 
+#ifndef SD_CARD_ENABLED
         if (disk_drive.currentDisk == 0) {
             lseek(disk_drive.current->fp, seek_offset, SEEK_SET);
-        } else {
-            disk_drive.current->diskPointer = seek_offset;
-            disk_drive.current->haveSectorData = false;
-            disk_drive.current->sectorPointer = 0;
         }
+#endif
+        disk_drive.current->diskPointer = seek_offset;
+        disk_drive.current->haveSectorData = false;
+        disk_drive.current->sectorPointer = 0;
     }
 
     if (b & CONTROL_STEP_OUT) {
@@ -231,14 +232,14 @@ void disk_function(uint8_t b)
 
         uint32_t seek_offset = TRACK * disk_drive.current->track;
 
+#ifndef SD_CARD_ENABLED
         if (disk_drive.currentDisk == 0) {
             lseek(disk_drive.current->fp, seek_offset, SEEK_SET);
-            disk_drive.current->haveSectorData = false;
-        } else {
-            disk_drive.current->diskPointer = seek_offset;
-            disk_drive.current->haveSectorData = false;
-            disk_drive.current->sectorPointer = 0;
         }
+#endif
+        disk_drive.current->diskPointer = seek_offset;
+        disk_drive.current->haveSectorData = false;
+        disk_drive.current->sectorPointer = 0;
     }
 
     if (b & CONTROL_HEAD_LOAD) {
@@ -280,15 +281,14 @@ uint8_t sector()
 
     seek_offset = disk_drive.current->track * TRACK + disk_drive.current->sector * (SECTOR_SIZE);
     disk_drive.current->sectorPointer = 0;
-
+#ifndef SD_CARD_ENABLED
     if (disk_drive.currentDisk == 0) {
         lseek(disk_drive.current->fp, seek_offset, SEEK_SET);
-        disk_drive.current->haveSectorData = false;
-    } else {
-        disk_drive.current->diskPointer = seek_offset;
-        disk_drive.current->sectorPointer = 0; // needs to be set here for write operation (read fetches sector data and resets the pointer).
-        disk_drive.current->haveSectorData = false;
     }
+#endif
+    disk_drive.current->diskPointer = seek_offset;
+    disk_drive.current->sectorPointer = 0; // needs to be set here for write operation (read fetches sector data and resets the pointer).
+    disk_drive.current->haveSectorData = false;
 
     ret_val = (uint8_t)(disk_drive.current->sector << 1);
 
@@ -313,33 +313,33 @@ void disk_write(uint8_t b)
 
 uint8_t disk_read()
 {
+#ifdef SD_CARD_ENABLED
+    if (!disk_drive.current->haveSectorData) {
+        disk_drive.current->sectorPointer = 0;
+
+        memset(intercore_disk_block.sector, 0x00, sizeof(intercore_disk_block.sector));
+        intercore_disk_block.cached = false;
+        intercore_disk_block.success = false;
+        intercore_disk_block.drive_number = disk_drive.currentDisk;
+        intercore_disk_block.sector_number = (uint16_t)(disk_drive.current->diskPointer / 137);
+        intercore_disk_block.disk_ic_msg_type = DISK_IC_READ;
+        dx_intercorePublish(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
+
+        dx_intercoreRead(&intercore_sd_card_ctx);
+        if (intercore_disk_block.success) {
+            disk_drive.current->haveSectorData = true;
+            memcpy(disk_drive.current->sectorData, intercore_disk_block.sector, 137);
+        }
+    }
+#else
     if (disk_drive.currentDisk == 0) {
         if (!disk_drive.current->haveSectorData) {
+
             disk_drive.current->sectorPointer = 0;
             disk_drive.current->haveSectorData = true;
-            read(disk_drive.current->fp, disk_drive.current->sectorData, SECTOR_SIZE);        
+            read(disk_drive.current->fp, disk_drive.current->sectorData, SECTOR_SIZE);
         }
     } else {
-#ifdef SD_CARD_ENABLED
-        if (!disk_drive.current->haveSectorData) {
-
-            disk_drive.current->sectorPointer = 0;
-
-            memset(intercore_disk_block.sector, 0x00, sizeof(intercore_disk_block.sector));
-            intercore_disk_block.cached = false;
-            intercore_disk_block.success = false;
-            intercore_disk_block.drive_number = 1;
-            intercore_disk_block.sector_number = (uint16_t)(disk_drive.current->diskPointer / 137);
-            intercore_disk_block.disk_ic_msg_type = DISK_IC_READ;
-            dx_intercorePublish(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
-
-            dx_intercoreRead(&intercore_sd_card_ctx);
-            if (intercore_disk_block.success) {
-                disk_drive.current->haveSectorData = true;
-                memcpy(disk_drive.current->sectorData, intercore_disk_block.sector, 137);
-            }
-        }
-#else
         if (!disk_drive.current->haveSectorData) {
             disk_drive.current->haveSectorData = true;
             disk_drive.current->sectorPointer = 0;
@@ -347,8 +347,9 @@ uint8_t disk_read()
                 Log_Debug("Virtual disk sector read failed\n");
             }
         }
-#endif // SD_CARD_ENABLED
     }
+
+#endif // SD_CARD_ENABLED
 
     return disk_drive.current->sectorData[disk_drive.current->sectorPointer++];
 }
@@ -356,8 +357,6 @@ uint8_t disk_read()
 void writeSector(disk_t *pDisk)
 {
 #ifdef SD_CARD_ENABLED
-
-    // Log_Debug("Writing: Sector: %d, bytes: %d\n", (pDisk->diskPointer / 137), disk_drive.current->sectorPointer);
 
     memcpy(intercore_disk_block.sector, pDisk->sectorData, 137);
     intercore_disk_block.cached = false;

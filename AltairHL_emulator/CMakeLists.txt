@@ -229,4 +229,10 @@ if (SEEED_STUDIO_RDB)
     azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "../HardwareDefinitions/mt3620_rdb" TARGET_DEFINITION "azure_sphere_learning_path.json")
 endif()
 
-azsphere_target_add_image_package(${PROJECT_NAME} RESOURCE_FILES  "certs/ca.crt" "certs/client.key" "certs/client.crt" "BasicSamples/STARTREK.BAS" "BasicSamples/TICTACTOE.BAS" "BasicSamples/SIMPLE.BAS" "BasicSamples/LOOPY.BAS" "BasicSamples/WEATHER.BAS" "BasicSamples/IOT.BAS" "Disks/88dskrom.bin" "Disks/cpm63k.dsk")
+
+# If MICRO_SD_CLICK enabled then don't deploy the "Disks/cpm63k.dsk" disk image as CP/M will be booted from microSD Card. Reduces deploymemt time.
+if (MICRO_SD_CLICK)
+    azsphere_target_add_image_package(${PROJECT_NAME} RESOURCE_FILES  "certs/ca.crt" "certs/client.key" "certs/client.crt" "BasicSamples/STARTREK.BAS" "BasicSamples/TICTACTOE.BAS" "BasicSamples/SIMPLE.BAS" "BasicSamples/LOOPY.BAS" "BasicSamples/WEATHER.BAS" "BasicSamples/IOT.BAS" "Disks/88dskrom.bin")
+else (MICRO_SD_CLICK)
+    azsphere_target_add_image_package(${PROJECT_NAME} RESOURCE_FILES  "certs/ca.crt" "certs/client.key" "certs/client.crt" "BasicSamples/STARTREK.BAS" "BasicSamples/TICTACTOE.BAS" "BasicSamples/SIMPLE.BAS" "BasicSamples/LOOPY.BAS" "BasicSamples/WEATHER.BAS" "BasicSamples/IOT.BAS" "Disks/88dskrom.bin" "Disks/cpm63k.dsk")
+endif (MICRO_SD_CLICK)
