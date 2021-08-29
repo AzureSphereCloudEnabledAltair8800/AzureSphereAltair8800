@@ -15,7 +15,7 @@ static bool read_from_cache = false;
 static uint32_t sector_requested = UINT32_MAX;
 
 typedef enum { TRACK_MODE, SECTOR_MODE } DISK_SELECT_MODE;
-void writeSector(disk_t *disk);
+void writeSector(disk_t *pDisk, uint8_t drive_number);
 disks disk_drive;
 
 // static uint16_t cal_crc(uint8_t *sector)
@@ -199,9 +199,15 @@ void disk_function(uint8_t b)
             clear_status(STATUS_TRACK_0);
         }
 
+#ifndef SD_CARD_ENABLED
         if (disk_drive.currentDisk != 0 && disk_drive.current->sectorDirty) {
-            writeSector(disk_drive.current);
+            writeSector(disk_drive.current, disk_drive.currentDisk);
         }
+#else
+        if (disk_drive.current->sectorDirty) {
+            writeSector(disk_drive.current, disk_drive.currentDisk);
+        }
+#endif
 
         uint32_t seek_offset = TRACK * disk_drive.current->track;
 
@@ -226,9 +232,15 @@ void disk_function(uint8_t b)
 
         disk_drive.current->sector = 0;
 
+#ifndef SD_CARD_ENABLED
         if (disk_drive.currentDisk != 0 && disk_drive.current->sectorDirty) {
-            writeSector(disk_drive.current);
+            writeSector(disk_drive.current, disk_drive.currentDisk);
         }
+#else
+        if (disk_drive.current->sectorDirty) {
+            writeSector(disk_drive.current, disk_drive.currentDisk);
+        }
+#endif
 
         uint32_t seek_offset = TRACK * disk_drive.current->track;
 
@@ -275,9 +287,15 @@ uint8_t sector()
         disk_drive.current->sector = 0;
     }
 
+#ifndef SD_CARD_ENABLED
     if (disk_drive.currentDisk != 0 && disk_drive.current->sectorDirty) {
-        writeSector(disk_drive.current);
+        writeSector(disk_drive.current, disk_drive.currentDisk);
     }
+#else
+    if (disk_drive.current->sectorDirty) {
+        writeSector(disk_drive.current, disk_drive.currentDisk);
+    }
+#endif
 
     seek_offset = disk_drive.current->track * TRACK + disk_drive.current->sector * (SECTOR_SIZE);
     disk_drive.current->sectorPointer = 0;
@@ -298,11 +316,17 @@ uint8_t sector()
 
 void disk_write(uint8_t b)
 {
+
+#ifndef SD_CARD_ENABLED
     if (disk_drive.currentDisk != 0) {
         // calculate file offset from TRACK and offset.
         disk_drive.current->sectorData[disk_drive.current->sectorPointer++] = b;
         disk_drive.current->sectorDirty = true;
     }
+#else
+    disk_drive.current->sectorData[disk_drive.current->sectorPointer++] = b;
+    disk_drive.current->sectorDirty = true;
+#endif
 
     if (disk_drive.current->write_status == 137) {
         disk_drive.current->write_status = 0;
@@ -354,14 +378,14 @@ uint8_t disk_read()
     return disk_drive.current->sectorData[disk_drive.current->sectorPointer++];
 }
 
-void writeSector(disk_t *pDisk)
+void writeSector(disk_t *pDisk, uint8_t drive_number)
 {
 #ifdef SD_CARD_ENABLED
 
     memcpy(intercore_disk_block.sector, pDisk->sectorData, 137);
     intercore_disk_block.cached = false;
     intercore_disk_block.success = false;
-    intercore_disk_block.drive_number = 1;
+    intercore_disk_block.drive_number = drive_number;
     intercore_disk_block.sector_number = (uint16_t)(disk_drive.current->diskPointer / 137);
     intercore_disk_block.disk_ic_msg_type = DISK_IC_WRITE;
     dx_intercorePublish(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
