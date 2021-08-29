@@ -17,9 +17,10 @@ set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")
 # SELECT FRONT PANEL CONFIG #######################################################################################
 #
 set(ALTAIR_FRONT_PANEL_NONE TRUE "Altair on Azure Sphere with no panel.")
-# set(ALTAIR_FRONT_PANEL_KIT TRUE "Altair front panel board")
-# set(ALTAIR_FRONT_PANEL_CLICK TRUE "Avnet with the MikroE 4x4 keypad Click and MikroE 8x8 LED Click")
 # set(ALTAIR_FRONT_PANEL_RETRO_CLICK TRUE "Avnet with the MikroE Altair 8800 Retro Click")
+# set(ALTAIR_FRONT_PANEL_KIT TRUE "Altair front panel board")
+#
+###################################################################################################################
 
 # ENABLE SD CARD ##################################################################################################
 #

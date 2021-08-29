@@ -20,7 +20,6 @@
       "$LED_BLUE"
     ],
     "Uart": [ "$MT3620_ISU3_UART" ],
-    "SpiMaster": [ "$MT3620_ISU1_SPI" ],
     "I2cMaster": [ "$ISU2" ],
     "PowerControls": [ "ForceReboot" ],
     "AllowedConnections": [
