@@ -31,7 +31,6 @@
 #define CORE_DISK_CACHE_COMPONENT_ID "9b684af8-21b9-42aa-91e4-621d5428e497"
 #define CORE_SD_CARD_COMPONENT_ID "005180bc-402f-4cb3-a662-72937dbcde47"
 
-static bool loadRomImage(char *romImageName, uint16_t loadAddress);
 static void *altair_thread(void *arg);
 static void connection_status_led_off_handler(EventLoopTimer *eventLoopTimer);
 static void connection_status_led_on_handler(EventLoopTimer *eventLoopTimer);

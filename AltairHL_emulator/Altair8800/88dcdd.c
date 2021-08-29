@@ -199,21 +199,19 @@ void disk_function(uint8_t b)
             clear_status(STATUS_TRACK_0);
         }
 
+        uint32_t seek_offset = TRACK * disk_drive.current->track;
+
 #ifndef SD_CARD_ENABLED
         if (disk_drive.currentDisk != 0 && disk_drive.current->sectorDirty) {
             writeSector(disk_drive.current, disk_drive.currentDisk);
         }
+
+        if (disk_drive.currentDisk == 0) {
+            lseek(disk_drive.current->fp, seek_offset, SEEK_SET);
+        }
 #else
         if (disk_drive.current->sectorDirty) {
             writeSector(disk_drive.current, disk_drive.currentDisk);
-        }
-#endif
-
-        uint32_t seek_offset = TRACK * disk_drive.current->track;
-
-#ifndef SD_CARD_ENABLED
-        if (disk_drive.currentDisk == 0) {
-            lseek(disk_drive.current->fp, seek_offset, SEEK_SET);
         }
 #endif
         disk_drive.current->diskPointer = seek_offset;
@@ -231,22 +229,19 @@ void disk_function(uint8_t b)
         }
 
         disk_drive.current->sector = 0;
+        uint32_t seek_offset = TRACK * disk_drive.current->track;
 
 #ifndef SD_CARD_ENABLED
         if (disk_drive.currentDisk != 0 && disk_drive.current->sectorDirty) {
             writeSector(disk_drive.current, disk_drive.currentDisk);
         }
+
+        if (disk_drive.currentDisk == 0) {
+            lseek(disk_drive.current->fp, seek_offset, SEEK_SET);
+        }
 #else
         if (disk_drive.current->sectorDirty) {
             writeSector(disk_drive.current, disk_drive.currentDisk);
-        }
-#endif
-
-        uint32_t seek_offset = TRACK * disk_drive.current->track;
-
-#ifndef SD_CARD_ENABLED
-        if (disk_drive.currentDisk == 0) {
-            lseek(disk_drive.current->fp, seek_offset, SEEK_SET);
         }
 #endif
         disk_drive.current->diskPointer = seek_offset;
