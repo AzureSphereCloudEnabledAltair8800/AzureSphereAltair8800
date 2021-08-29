@@ -683,12 +683,14 @@ static bool loadRomImage(char* romImageName, uint16_t loadAddress) {
 	return true;
 }
 
+#ifndef BOOT_CPM
 static void load8kRom(void) {
 	const uint8_t rom[] = {
 #include "Altair8800/8krom.h"
 	};
 	memcpy(memory, rom, sizeof(rom));
 }
+#endif
 
 static void print_console_banner(void) {
 	for (int x = 0; x < strlen(AltairMsg); x++) {
