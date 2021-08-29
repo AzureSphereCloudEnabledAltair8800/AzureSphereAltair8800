@@ -159,16 +159,12 @@ static void handleRecvMsg(void *handle)
     switch (pMsg->disk_ic_msg_type)
     {
     case DISK_IC_READ:
-#ifdef SHOW_DEBUG_INFO
-        UART_Printf(debug, "READ Block %d - ", pMsg->blockNumber);
-#endif
         memset(buff, 0x00, sizeof(buff));
         if (!SD_ReadBlock(card, (uint32_t)(pMsg->sector_number + (pMsg->drive_number * 3000)), buff)) {
             // If read block fails then return an error state to the A7
-            UART_Printf(debug, "ERROR: reading block\r\n");
             pMsg->disk_ic_msg_type = DISK_IC_READ;
             pMsg->success = false;
-            memcpy(pMsg->sector, 0x00, 137);
+            memset(pMsg->sector, 0x00, 137);
             WriteDataToA7(pMsg, sizeof(INTERCORE_DISK_DATA_BLOCK_T));
         }
         else
@@ -178,17 +174,11 @@ static void handleRecvMsg(void *handle)
             memcpy(pMsg->sector, buff, 137);
             pMsg->disk_ic_msg_type = DISK_IC_READ;
             pMsg->success = true;
-#ifdef SHOW_DEBUG_INFO
-            UART_Printf(debug, "Returning block %d - ", pMsg->blockNumber);
-#endif
             WriteDataToA7(pMsg, sizeof(INTERCORE_DISK_DATA_BLOCK_T));
         }
         break;
 
     case DISK_IC_WRITE:
-#ifdef SHOW_DEBUG_INFO
-        UART_Printf(debug, "WRITE Block %d - ", pMsg->blockNumber);
-#endif
 
         memset(buff, 0x00, sizeof(buff));
         memcpy(buff, pMsg->sector, 137);
@@ -277,19 +267,15 @@ _Noreturn void RTCoreMain(void)
     VectorTableInit();
     CPUFreq_Set(197600000);
 
-    debug = UART_Open(MT3620_UNIT_UART_DEBUG, 115200, UART_PARITY_NONE, 1, NULL);
-    UART_Print(debug, "\033[2J\033[0;0H--------------------------------\r\n");
-    UART_Print(debug, "M4 SD Card Interface Application\r\n");
-    UART_Print(debug, "App built on: " __DATE__ " " __TIME__ "\r\n");
+    //debug = UART_Open(MT3620_UNIT_UART_DEBUG, 115200, UART_PARITY_NONE, 1, NULL);
+    //UART_Print(debug, "\033[2J\033[0;0H--------------------------------\r\n");
+    //UART_Print(debug, "M4 SD Card Interface Application\r\n");
+    //UART_Print(debug, "App built on: " __DATE__ " " __TIME__ "\r\n");
 
     //bool wait = true;
     //while (wait);
 
-    // Setup socket
-    socket = Socket_Open(handleRecvMsgWrapper);
-    if (!socket) {
-        UART_Printf(debug, "ERROR: socket initialisation failed\r\n");
-    }
+
 
     // Open SPI 
     // ISU0 was chosen so the code could run on the Avnet V2 board with a Mikroe SD Card Click board.
@@ -307,6 +293,12 @@ _Noreturn void RTCoreMain(void)
     if (!card) {
         UART_Print(debug,
             "ERROR: Failed to open SD card.\r\n");
+    }
+
+    // Setup socket
+    socket = Socket_Open(handleRecvMsgWrapper);
+    if (!socket) {
+        UART_Printf(debug, "ERROR: socket initialisation failed\r\n");
     }
 
     //SD_SetBlockLen(card, 137);

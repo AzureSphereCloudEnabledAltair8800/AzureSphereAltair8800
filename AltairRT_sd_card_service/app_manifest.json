@@ -1,6 +1,6 @@
 {
   "SchemaVersion": 1,
-  "Name": "AltairRT_sd_card_server",
+  "Name": "AltairRT_sd_card_service",
   "ComponentId": "005180bc-402f-4cb3-a662-72937dbcde47",
   "EntryPoint": "/bin/app",
   "Capabilities": {
@@ -10,7 +10,7 @@
       "8E24FC73-A329-4D99-9B37-2EE54DC795E7"
     ],
     "SpiMaster": [
-      "ISU0"
+      "ISU10"
     ]
   },
   "ApplicationType": "RealTimeCapable"

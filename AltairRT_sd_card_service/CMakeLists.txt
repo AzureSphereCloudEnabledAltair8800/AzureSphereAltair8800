@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(AltairRT_sd_card_server C)
+project(AltairRT_sd_card_service C)
 
 azsphere_configure_tools(TOOLS_REVISION "21.07")
 
