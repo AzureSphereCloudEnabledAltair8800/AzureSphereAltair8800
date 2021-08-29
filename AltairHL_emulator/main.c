@@ -725,7 +725,7 @@ static void* altair_thread(void* arg) {
     disk_drive.disk1.track = 0;
 #endif
 
-	// drive 2 is virtual (Python Server or MQTT Server).
+	// drive 2 is virtual (Python Server or MQTT Server) or microSD Card
 	disk_drive.disk2.fp = -1;
 	disk_drive.disk2.diskPointer = 0;
 	disk_drive.disk2.sector = 0;
@@ -733,13 +733,17 @@ static void* altair_thread(void* arg) {
 
 	i8080_reset(&cpu, (port_in)altair_read_terminal, (port_out)altair_write_terminal, sense, &disk_controller, (azure_sphere_port_in)sphere_port_in,
 		(azure_sphere_port_out)sphere_port_out);
-	load8kRom(); // load 8k rom basic into memory at address 0x0000.
 
 	// load Disk Loader at 0xff00
 	if (!loadRomImage("Disks/88dskrom.bin", 0xff00))
 		Log_Debug("Failed to load Disk ROM image\n");
 
-	i8080_examine(&cpu, 0x0000); // 0xff00 loads from disk, 0x0000 loads basic
+#ifdef BOOT_CPM
+    i8080_examine(&cpu, 0xff00); // 0xff00 loads from disk, 0x0000 loads basic
+#else
+	load8kRom();                 // load 8k rom basic into memory at address 0x0000.
+    i8080_examine(&cpu, 0x0000); // 0xff00 loads from disk, 0x0000 loads basic
+#endif // BOOT_CPM
 
 	while (1) {
 		if (cpu_operating_mode == CPU_RUNNING) {
