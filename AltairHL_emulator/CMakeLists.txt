@@ -31,6 +31,14 @@ set(ALTAIR_FRONT_PANEL_NONE TRUE "Altair on Azure Sphere with no panel.")
 #
 ###################################################################################################################
 
+# BOOT CONFIG #####################################################################################################
+#
+# Comment out the "add_compile_definitions(BOOT_CPM) line below to boot Altair BASIC 4.0
+#
+add_compile_definitions(BOOT_CPM)
+#
+###################################################################################################################
+
 # MQTT BROKER CONFIG ##############################################################################################
 #
 add_compile_definitions(ALTAIR_MQTT_HOST="test.mosquitto.org")
