@@ -428,9 +428,9 @@ static void connection_status_led_on_handler(EventLoopTimer* eventLoopTimer) {
 	} else if (dx_isAzureConnected() && is_mqtt_connected()) {
 
 		dx_gpioOn(&azure_iot_connected_led);
-		// on for 5000ms off for 200ms = 5200 ms in total
-		dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){5, 0});
-		dx_timerOneShotSet(&connectionStatusLedOffTimer, &(struct timespec){4, 800 * OneMS});
+		// on for 1400 off for 100ms = 1400 ms in total
+		dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 400 * OneMS});
+        dx_timerOneShotSet(&connectionStatusLedOffTimer, &(struct timespec){1, 300 * OneMS});
 
 	} else if (dx_isNetworkReady()) {
 
