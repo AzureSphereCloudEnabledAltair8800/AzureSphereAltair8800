@@ -6,8 +6,6 @@
 *.user
 *.sln.docstates
 
-certs/
-
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
