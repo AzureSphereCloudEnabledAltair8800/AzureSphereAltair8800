@@ -48,11 +48,6 @@ static void vdisk_cache_read_sector(disk_t *pDisk)
     intercore_disk_block.sector_number = requested_sector_number;
     intercore_disk_block.cached = false;
 
-    if (!dx_intercorePublish(&intercore_disk_cache_ctx, &intercore_disk_block, 3)) {
-        // false will be return if the RT core app is not running
-        return;
-    }
-
     //// NOTE, the cache server on M4 must be compiled in released mode, optimised for speed to service read requests in time
     //// measure using finish clock_gettime(CLOCK_MONOTONIC, &finish); - start clock_gettime(CLOCK_MONOTONIC, &start);
     //// measurements were timed using release build with debugger attached for log_debug time stats
@@ -70,7 +65,7 @@ static void vdisk_cache_read_sector(disk_t *pDisk)
     //// Avg cache read response 45781 nanoseconds
     //// Avg cache read response 45772 nanoseconds
 
-    if (dx_intercoreRead(&intercore_disk_cache_ctx) == -1) {
+    if (dx_intercorePublishThenRead(&intercore_disk_cache_ctx, &intercore_disk_block, 3) < 0) {
         return;
     }
 
@@ -342,9 +337,9 @@ uint8_t disk_read()
         intercore_disk_block.drive_number = disk_drive.currentDisk;
         intercore_disk_block.sector_number = (uint16_t)(disk_drive.current->diskPointer / 137);
         intercore_disk_block.disk_ic_msg_type = DISK_IC_READ;
-        dx_intercorePublish(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
 
-        dx_intercoreRead(&intercore_sd_card_ctx);
+        dx_intercorePublishThenRead(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
+
         if (intercore_disk_block.success) {
             disk_drive.current->haveSectorData = true;
             memcpy(disk_drive.current->sectorData, intercore_disk_block.sector, 137);
@@ -383,9 +378,9 @@ void writeSector(disk_t *pDisk, uint8_t drive_number)
     intercore_disk_block.drive_number = drive_number;
     intercore_disk_block.sector_number = (uint16_t)(disk_drive.current->diskPointer / 137);
     intercore_disk_block.disk_ic_msg_type = DISK_IC_WRITE;
-    dx_intercorePublish(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
 
-    dx_intercoreRead(&intercore_sd_card_ctx);
+    dx_intercorePublishThenRead(&intercore_sd_card_ctx, &intercore_disk_block, sizeof(intercore_disk_block));
+
     // if (intercore_disk_block.success) {
     //    Log_Debug("block written: %d\n", (uint16_t)(disk_drive.current->diskPointer / 137));
     //} else {

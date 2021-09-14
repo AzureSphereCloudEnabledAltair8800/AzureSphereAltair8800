@@ -795,6 +795,9 @@ static void InitPeripheralAndHandlers(void) {
 	dx_intercoreConnect(&intercore_disk_cache_ctx);
 	dx_intercoreConnect(&intercore_sd_card_ctx);
 
+    // set intercore read after publish timeout to 1000 microseconds
+    dx_intercoreReadTimeoutSet(&intercore_disk_cache_ctx, 1000);
+
 	dx_timerOneShotSet(&mqtt_do_work_timer, &(struct timespec){1, 0});
 	dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 0});
 	dx_startThreadDetached(altair_thread, NULL, "altair_thread");

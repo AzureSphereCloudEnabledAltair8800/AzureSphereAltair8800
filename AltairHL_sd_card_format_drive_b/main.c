@@ -84,9 +84,9 @@ static bool write_drive(const char *filename, uint8_t drive_number)
             ic_control_block_app_one.success = false;
             ic_control_block_app_one.sector_number = (uint16_t)sector_number;
             ic_control_block_app_one.disk_ic_msg_type = DISK_IC_WRITE;
-            dx_intercorePublish(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one));
 
-            dx_intercoreRead(&intercore_app_one);
+            dx_intercorePublishThenRead(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one));
+
             if (ic_control_block_app_one.success) {
                 Log_Debug("block written: %d\n", (int)sector_number);
             } else {
@@ -116,9 +116,9 @@ static bool write_drive(const char *filename, uint8_t drive_number)
             ic_control_block_app_one.drive_number = drive_number;
             ic_control_block_app_one.sector_number = (uint16_t)sector_number;
             ic_control_block_app_one.disk_ic_msg_type = DISK_IC_READ;
-            dx_intercorePublish(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one));
 
-            dx_intercoreRead(&intercore_app_one);
+            dx_intercorePublishThenRead(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one));
+
             if (ic_control_block_app_one.success) {
 
                 sd_crc = cal_crc(ic_control_block_app_one.sector);
@@ -173,6 +173,8 @@ static void InitPeripheralAndHandlers(void)
 
     // Initialize Intercore Communications for core one
     dx_intercoreConnect(&intercore_app_one);
+    // set intercore read after publish timeout to 1000 microseconds
+    dx_intercoreReadTimeoutSet(&intercore_app_one, 1000);
 }
 
 /// <summary>
