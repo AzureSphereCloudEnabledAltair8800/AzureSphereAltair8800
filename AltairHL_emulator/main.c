@@ -796,7 +796,7 @@ static void InitPeripheralAndHandlers(void) {
 
         dx_intercoreConnect(&intercore_sd_card_ctx);
         // set intercore read after publish timeout to 10000000 microseconds = 10 seconds
-        dx_intercoreReadTimeoutSet(&intercore_sd_card_ctx, 10000000);
+        dx_intercorePublishThenReadTimeout(&intercore_sd_card_ctx, 10000000);
 
 #else
 
