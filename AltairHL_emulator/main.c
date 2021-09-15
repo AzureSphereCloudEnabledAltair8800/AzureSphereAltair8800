@@ -802,7 +802,7 @@ static void InitPeripheralAndHandlers(void) {
 
         dx_intercoreConnect(&intercore_disk_cache_ctx);
         // set intercore read after publish timeout to 1000 microseconds
-        dx_intercoreReadTimeoutSet(&intercore_disk_cache_ctx, 1000);
+        dx_intercorePublishThenReadTimeout(&intercore_disk_cache_ctx, 1000);
 
 #endif // SD_CARD_ENABLED
 

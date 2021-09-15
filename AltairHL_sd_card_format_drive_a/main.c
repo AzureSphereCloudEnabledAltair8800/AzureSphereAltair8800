@@ -181,7 +181,7 @@ static void InitPeripheralAndHandlers(void)
     // Initialize Intercore Communications for core one
     dx_intercoreConnect(&intercore_app_one);
     // set intercore read after publish timeout to 10000000 microseconds = 10 seconds
-    dx_intercoreReadTimeoutSet(&intercore_app_one, 10000000);
+    dx_intercorePublishThenReadTimeout(&intercore_app_one, 10000000);
 }
 
 /// <summary>
