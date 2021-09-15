@@ -792,11 +792,19 @@ static void InitPeripheralAndHandlers(void) {
 	onboard_sensors_read(&onboard_telemetry.latest);
 	onboard_telemetry.updated = true;
 
-	dx_intercoreConnect(&intercore_disk_cache_ctx);
-	dx_intercoreConnect(&intercore_sd_card_ctx);
+#ifdef SD_CARD_ENABLED
 
-    // set intercore read after publish timeout to 1000 microseconds
-    dx_intercoreReadTimeoutSet(&intercore_disk_cache_ctx, 1000);
+        dx_intercoreConnect(&intercore_sd_card_ctx);
+        // set intercore read after publish timeout to 10000000 microseconds = 10 seconds
+        dx_intercoreReadTimeoutSet(&intercore_sd_card_ctx, 10000000);
+
+#else
+
+        dx_intercoreConnect(&intercore_disk_cache_ctx);
+        // set intercore read after publish timeout to 1000 microseconds
+        dx_intercoreReadTimeoutSet(&intercore_disk_cache_ctx, 1000);
+
+#endif // SD_CARD_ENABLED
 
 	dx_timerOneShotSet(&mqtt_do_work_timer, &(struct timespec){1, 0});
 	dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 0});

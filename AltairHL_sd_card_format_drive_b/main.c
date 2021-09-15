@@ -1,6 +1,5 @@
 ﻿/* Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
- * file can be found in the IntercoreContract directory.
  *************************************************************************************************************************************/
 
 // Hardware definition
@@ -53,7 +52,7 @@ static uint16_t cal_crc(uint8_t *data)
 {
     uint16_t crc = 0x0000;
     for (int x = 0; x < 137; x++) {
-        crc += data[x];
+        crc = (uint16_t)(crc + data[x]);
         crc &= 0xffff;
     }
     return crc;
@@ -74,6 +73,8 @@ static bool write_drive(const char *filename, uint8_t drive_number)
             dx_gpioOn(&gpio_led_green);
             dx_gpioOff(&gpio_led_red);
 
+            memset(&ic_control_block_app_one, 0x00, sizeof(INTERCORE_DISK_DATA_BLOCK_T));
+
             ssize_t ret = pread(disk_fd, ic_control_block_app_one.sector, sizeof(ic_control_block_app_one.sector), sector_number * 137);
             if (ret == 0) {
                 break;
@@ -85,12 +86,14 @@ static bool write_drive(const char *filename, uint8_t drive_number)
             ic_control_block_app_one.sector_number = (uint16_t)sector_number;
             ic_control_block_app_one.disk_ic_msg_type = DISK_IC_WRITE;
 
-            dx_intercorePublishThenRead(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one));
-
-            if (ic_control_block_app_one.success) {
-                Log_Debug("block written: %d\n", (int)sector_number);
+            if (dx_intercorePublishThenRead(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one)) < 0) {
+                Log_Debug("Intercore publish/read failed\n");
             } else {
-                Log_Debug("block NOT written\n");
+                if (ic_control_block_app_one.success) {
+                    Log_Debug("block written: %d\n", (int)sector_number);
+                } else {
+                    Log_Debug("block NOT written\n");
+                }
             }
 
             sector_number++;
@@ -101,6 +104,8 @@ static bool write_drive(const char *filename, uint8_t drive_number)
         // now verify writes to sd card
         while (true) {
 
+            memset(&ic_control_block_app_one, 0x00, sizeof(INTERCORE_DISK_DATA_BLOCK_T));
+
             ssize_t ret = pread(disk_fd, ic_control_block_app_one.sector, sizeof(ic_control_block_app_one.sector), sector_number * 137);
             if (ret == 0) {
                 break;
@@ -110,26 +115,28 @@ static bool write_drive(const char *filename, uint8_t drive_number)
 
             st_crc = cal_crc(ic_control_block_app_one.sector);
 
-            memset(ic_control_block_app_one.sector, 0x00, sizeof(ic_control_block_app_one.sector));
+            memset(&ic_control_block_app_one, 0x00, sizeof(INTERCORE_DISK_DATA_BLOCK_T));
             ic_control_block_app_one.cached = false;
             ic_control_block_app_one.success = false;
             ic_control_block_app_one.drive_number = drive_number;
             ic_control_block_app_one.sector_number = (uint16_t)sector_number;
             ic_control_block_app_one.disk_ic_msg_type = DISK_IC_READ;
 
-            dx_intercorePublishThenRead(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one));
-
-            if (ic_control_block_app_one.success) {
-
-                sd_crc = cal_crc(ic_control_block_app_one.sector);
-
-                if (sd_crc != st_crc) {
-                    success = false;
-                    Log_Debug("CRCs don't match for sector %d\n", (int)sector_number);
-                }
-
+            if (dx_intercorePublishThenRead(&intercore_app_one, &ic_control_block_app_one, sizeof(ic_control_block_app_one)) < 0) {
+                Log_Debug("Intercore publish/read failed\n");
             } else {
-                Log_Debug("block NOT read\n");
+                if (ic_control_block_app_one.success) {
+
+                    sd_crc = cal_crc(ic_control_block_app_one.sector);
+
+                    if (sd_crc != st_crc) {
+                        success = false;
+                        Log_Debug("CRCs don't match for sector %d\n", (int)sector_number);
+                    }
+
+                } else {
+                    Log_Debug("block NOT read\n");
+                }
             }
 
             sector_number++;
@@ -173,8 +180,8 @@ static void InitPeripheralAndHandlers(void)
 
     // Initialize Intercore Communications for core one
     dx_intercoreConnect(&intercore_app_one);
-    // set intercore read after publish timeout to 1000 microseconds
-    dx_intercoreReadTimeoutSet(&intercore_app_one, 1000);
+    // set intercore read after publish timeout to 10000000 microseconds = 10 seconds
+    dx_intercoreReadTimeoutSet(&intercore_app_one, 10000000);
 }
 
 /// <summary>
