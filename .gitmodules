@@ -31,3 +31,6 @@
 [submodule "AltairRT_sd_card_service/lib"]
 	path = AltairRT_sd_card_service/lib
 	url = https://github.com/CodethinkLabs/mt3620-m4-drivers
+[submodule "Tools"]
+	path = Tools
+	url = https://github.com/Azure-Sphere-DevX/AzureSphereDevX.Tools.git
