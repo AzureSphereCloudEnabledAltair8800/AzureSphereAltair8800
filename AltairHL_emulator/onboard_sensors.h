@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "hw/azure_sphere_learning_path.h"
+
 #ifdef OEM_AVNET
 #include "Drivers/AVNET/HL/imu_temp_pressure.h"
 #endif
