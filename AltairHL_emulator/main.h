@@ -4,6 +4,7 @@
 #include "dx_config.h"
 #include "dx_exit_codes.h"
 #include "dx_gpio.h"
+#include "dx_i2c.h"
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_intercore.h"
@@ -172,6 +173,19 @@ static DX_GPIO_BINDING *gpioSet[] = {&azure_iot_connected_led,
 //&memoryCS, &sdCS
 #endif // ALTAIR_FRONT_PANEL_KIT
 };
+
+#ifdef ALTAIR_FRONT_PANEL_RETRO_CLICK
+    DX_I2C_BINDING i2c_as1115_retro = {.interfaceId = ISU2, .speedInHz = I2C_BUS_SPEED_FAST_PLUS, .name = "i2c_as1115_retro"};
+    DX_I2C_BINDING i2c_onboard_sensors = {.interfaceId = ISU2, .speedInHz = I2C_BUS_SPEED_FAST_PLUS, .name = "i2c_onboard_sensors"};
+    static DX_I2C_BINDING *i2c_bindings[] = { &i2c_as1115_retro, &i2c_onboard_sensors };
+#else
+    #ifdef OEM_AVNET
+        DX_I2C_BINDING i2c_onboard_sensors = {.interfaceId = ISU2, .speedInHz = I2C_BUS_SPEED_FAST_PLUS, .name = "i2c_onboard_sensors"};
+        static DX_I2C_BINDING *i2c_bindings[] = { &i2c_onboard_sensors };
+    #else
+        static DX_I2C_BINDING *i2c_bindings[] = {};
+    #endif
+#endif // ALTAIR_FRONT_PANEL_RETRO_CLICK
 
 static DX_TIMER_BINDING *timerSet[] = {&connectionStatusLedOnTimer,
                                        &connectionStatusLedOffTimer,

@@ -9,6 +9,7 @@
 #include "comms_manager_wolf.h"
 #include "dx_gpio.h"
 #include "dx_timer.h"
+#include "dx_i2c.h"
 #include "graphics.h"
 #include "hw/azure_sphere_learning_path.h"
 #include "as1115.h"
@@ -28,6 +29,7 @@ as1115_t retro_click;
 extern DX_GPIO_BINDING buttonB;
 extern DX_TIMER_BINDING turnOffNotificationsTimer;
 extern uint16_t bus_switches;
+extern DX_I2C_BINDING i2c_as1115_retro;
 
 
 void check_click_4x4key_mode_button(void);

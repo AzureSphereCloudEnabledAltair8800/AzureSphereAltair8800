@@ -17,5 +17,5 @@ typedef struct {
 } ONBOARD_TELEMETRY;
 
 bool onboard_sensors_read(ONBOARD_TELEMETRY *telemetry);
-bool onboard_sensors_init(void);
+bool onboard_sensors_init(int i2c_fd);
 bool onboard_sensors_close(void);

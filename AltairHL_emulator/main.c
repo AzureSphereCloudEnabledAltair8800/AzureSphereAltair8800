@@ -773,6 +773,7 @@ static void InitPeripheralAndHandlers(void) {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	dx_gpioSetOpen(gpioSet, NELEMS(gpioSet));
 	dx_gpioSetOpen(ledRgb, NELEMS(ledRgb));
+    dx_i2cSetOpen(i2c_bindings, NELEMS(i2c_bindings));
 	init_altair_hardware();
 
 #ifndef ALTAIR_FRONT_PANEL_NONE
@@ -788,7 +789,7 @@ static void InitPeripheralAndHandlers(void) {
 	dx_timerSetStart(timerSet, NELEMS(timerSet));
 	dx_directMethodSubscribe(directMethodBindingSet, NELEMS(directMethodBindingSet));
 
-	onboard_sensors_init();
+	onboard_sensors_init(i2c_onboard_sensors.fd);
 	onboard_sensors_read(&onboard_telemetry.latest);
 	onboard_telemetry.updated = true;
 
@@ -823,6 +824,7 @@ static void ClosePeripheralAndHandlers(void) {
 	dx_timerEventLoopStop();
 	dx_gpioSetClose(gpioSet, NELEMS(gpioSet));
 	dx_gpioSetClose(ledRgb, NELEMS(ledRgb));
+	dx_i2cSetClose(i2c_bindings, NELEMS(i2c_bindings));
 	onboard_sensors_close();
 	curl_global_cleanup();
 }

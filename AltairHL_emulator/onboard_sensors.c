@@ -2,9 +2,9 @@
 
 #ifdef OEM_AVNET
 
-bool onboard_sensors_init(void) {
+bool onboard_sensors_init(int i2c_fd) {
     srand((unsigned int)time(NULL)); // seed the random number generator for fake telemetry
-    avnet_imu_initialize(ISU2);
+    avnet_imu_initialize(i2c_fd);
 
     // lp_calibrate_angular_rate(); // call if using gyro
     // lp_OpenADC();
