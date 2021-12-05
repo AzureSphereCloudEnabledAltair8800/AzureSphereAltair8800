@@ -19,9 +19,20 @@ set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")
 cmake_minimum_required (VERSION 3.10)
 project (AltairHL_sd_card_format_b C)
 
-azsphere_configure_tools(TOOLS_REVISION "21.07")
-azsphere_configure_api(TARGET_API_SET "10")
+get_filename_component(PARENT_DIR ${PROJECT_SOURCE_DIR} DIRECTORY)
 
+if (EXISTS "${PARENT_DIR}/Tools/cmake/azsphere_config.cmake")
+    include(../Tools/cmake/azsphere_config.cmake)
+    auto_generate_azsphere_config()
+else()
+
+    # For information on setting tools revision and target api set see 
+    # https://docs.microsoft.com/en-us/azure-sphere/app-development/using-cmake-functions
+
+    azsphere_configure_tools(TOOLS_REVISION "21.07")
+    azsphere_configure_api(TARGET_API_SET "10")
+
+endif()
 
 add_subdirectory("AzureSphereDevX" out)
 
