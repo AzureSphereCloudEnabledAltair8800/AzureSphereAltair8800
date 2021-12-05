@@ -8,8 +8,8 @@ get_filename_component(PARENT_DIR ${PROJECT_SOURCE_DIR} DIRECTORY)
 
 include(cmake/altair_config.cmake)
 
-if (EXISTS "${PARENT_DIR}/tools/cmake/azsphere_config.cmake")
-    include(../tools/cmake/azsphere_config.cmake)
+if (EXISTS "${PARENT_DIR}/Tools/cmake/azsphere_config.cmake")
+    include(../Tools/cmake/azsphere_config.cmake)
     auto_generate_azsphere_config()
 else()
 
