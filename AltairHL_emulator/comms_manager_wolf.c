@@ -214,7 +214,7 @@ bool is_mqtt_connected(void)
 
 #ifdef WOLFMQTT_DISCONNECT_CB
 /* callback indicates a network error occurred */
-static int mqtt_disconnect_cb(MqttClient *client, int error_code, void *ctx)
+static int azure_sphere_mqtt_disconnect_cb(MqttClient *client, int error_code, void *ctx)
 {
     int rc;
 
@@ -235,7 +235,7 @@ static int mqtt_disconnect_cb(MqttClient *client, int error_code, void *ctx)
 }
 #endif
 
-static int mqtt_message_cb(MqttClient *client, MqttMessage *msg, byte msg_new, byte msg_done)
+static int azure_sphere_mqtt_message_cb(MqttClient *client, MqttMessage *msg, byte msg_new, byte msg_done)
 {
     if (msg_new) {
         _publish_callback(msg);
@@ -289,7 +289,8 @@ static int init_mqtt_connection(MQTTCtx *mqttCtx)
     mqttCtx->rx_buf = rx_buf;
 
     /* Initialize MqttClient structure */
-    rc = MqttClient_Init(&mqttCtx->client, &mqttCtx->net, mqtt_message_cb, mqttCtx->tx_buf, MAX_BUFFER_SIZE, mqttCtx->rx_buf, MAX_BUFFER_SIZE, (int)mqttCtx->cmd_timeout_ms);
+    rc = MqttClient_Init(&mqttCtx->client, &mqttCtx->net, azure_sphere_mqtt_message_cb, mqttCtx->tx_buf, MAX_BUFFER_SIZE, mqttCtx->rx_buf,
+                         MAX_BUFFER_SIZE, (int)mqttCtx->cmd_timeout_ms);
 
     Log_Debug("MQTT Init: %s (%d)\n", MqttClient_ReturnCodeToString(rc), rc);
 
@@ -302,14 +303,15 @@ static int init_mqtt_connection(MQTTCtx *mqttCtx)
 
 #ifdef WOLFMQTT_DISCONNECT_CB
     /* setup disconnect callback */
-    rc = MqttClient_SetDisconnectCallback(&mqttCtx->client, mqtt_disconnect_cb, NULL);
+    rc = MqttClient_SetDisconnectCallback(&mqttCtx->client, azure_sphere_mqtt_disconnect_cb, NULL);
     if (rc != MQTT_CODE_SUCCESS) {
         return rc;
     }
 #endif
 
     /* Connect to broker */
-    rc = MqttClient_NetConnect(&mqttCtx->client, mqttCtx->host, mqttCtx->port, DEFAULT_CON_TIMEOUT_MS, mqttCtx->use_tls, azure_sphere_mqtt_tls_cb);
+    rc = MqttClient_NetConnect(&mqttCtx->client, mqttCtx->host, mqttCtx->port, DEFAULT_CON_TIMEOUT_MS, mqttCtx->use_tls,
+                               azure_sphere_mqtt_tls_cb);
 
     Log_Debug("MQTT Socket Connect: %s (%d)\n", MqttClient_ReturnCodeToString(rc), rc);
 
@@ -332,7 +334,8 @@ static int init_mqtt_connection(MQTTCtx *mqttCtx)
         rc = MqttClient_Connect(&mqttCtx->client, &mqttCtx->connect);
     } while (rc == MQTT_CODE_CONTINUE || rc == MQTT_CODE_STDIN_WAKE);
 
-    Log_Debug("MQTT Connect: Proto (%s), %s (%d)\n", MqttClient_GetProtocolVersionString(&mqttCtx->client), MqttClient_ReturnCodeToString(rc), rc);
+    Log_Debug("MQTT Connect: Proto (%s), %s (%d)\n", MqttClient_GetProtocolVersionString(&mqttCtx->client),
+              MqttClient_ReturnCodeToString(rc), rc);
 
     if (rc != MQTT_CODE_SUCCESS) {
         client_disconnect(mqttCtx);
@@ -405,7 +408,8 @@ static void *waitMessage_task(void *args)
                 client_disconnect(&gMqttCtx);
             }
         } else {
-            if (got_disconnected && ((channel_id = read_channel_id_from_storage()) != -1 || dt_channelId.propertyUpdated) && dx_isNetworkReady()) {
+            if (got_disconnected && ((channel_id = read_channel_id_from_storage()) != -1 || dt_channelId.propertyUpdated) &&
+                dx_isNetworkReady()) {
                 // if channel id is -1 then channel id was not in storage
                 if (channel_id == -1) {
                     channel_id = *(int *)(dt_channelId.propertyValue);
