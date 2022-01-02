@@ -827,7 +827,7 @@ int main(int argc, char *argv[])
     }
     InitPeripheralAndHandlers();
 
-    // Blocking call to run main loop until termination requested
+    // Blocking call to run main event loop until termination requested
     dx_eventLoopRun();
 
     ClosePeripheralAndHandlers();
