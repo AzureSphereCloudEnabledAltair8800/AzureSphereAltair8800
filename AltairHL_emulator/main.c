@@ -80,6 +80,7 @@ static char *input_data = NULL;
 bool local_serial = true;
 bool dirty_buffer = false;
 bool send_messages = false;
+bool send_ping = false;
 bool invoke_mqtt_sync = false;
 bool renderText = false;
 
@@ -441,11 +442,20 @@ DX_TIMER_HANDLER_END
 /// </summary>
 static DX_TIMER_HANDLER(mqtt_dowork_handler)
 {
+    static int mqtt_ping_count = 0;
+
+    mqtt_ping_count++;
+
     if (dirty_buffer) {
         send_messages = true;
-    }
+        mqtt_ping_count = 0;
+    }    
 
-    dx_timerOneShotSet(&mqtt_do_work_timer, &(struct timespec){0, 300 * OneMS});
+    // 4 * 250ms period * 15 = 15 seconds
+    if (mqtt_ping_count > 4 * 15) {
+        send_ping = true;
+        mqtt_ping_count = 0;
+    }
 }
 DX_TIMER_HANDLER_END
 
@@ -746,6 +756,11 @@ static void *altair_thread(void *arg)
             }
             dirty_buffer = send_messages = false;
         }
+
+        if (send_ping) {
+            send_mqtt_ping();
+            send_ping = false;
+        }
     }
 
     return NULL;
@@ -796,7 +811,6 @@ static void InitPeripheralAndHandlers(void)
 
 #endif // SD_CARD_ENABLED
 
-    dx_timerOneShotSet(&mqtt_do_work_timer, &(struct timespec){1, 0});
     dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 0});
     dx_startThreadDetached(altair_thread, NULL, "altair_thread");
 

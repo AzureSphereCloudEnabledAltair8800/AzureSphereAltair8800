@@ -35,28 +35,17 @@ static char output_buffer[MAX_BUFFER_SIZE / 4];
 static size_t output_buffer_length = 0;
 
 static MQTTCtx gMqttCtx;
-
-static DX_TIMER_BINDING ping_timer = {.repeat = &(struct timespec){15}, .handler = ping_handler, .name = "ping_timer"};
-
-/* locals */
 static word16 mPacketIdLast;
 
-/* argument parsing */
-// static int myoptind = 0;
-// static char* myoptarg = NULL;
-
-static DX_TIMER_HANDLER(ping_handler)
-{
+void send_mqtt_ping(void) {
     int rc;
-
     if (mqtt_connected) {
-        dx_Log_Debug("Ping\n");
+        //dx_Log_Debug("Ping\n");
         if ((rc = MqttClient_Ping(&gMqttCtx.client)) != MQTT_CODE_SUCCESS) {
             Log_Debug("MQTT Ping Keep Alive Error: %s (%d)\n", MqttClient_ReturnCodeToString(rc), rc);
         }
     }
 }
-DX_TIMER_HANDLER_END
 
 void mqtt_init_ctx(MQTTCtx *mqttCtx)
 {
@@ -583,7 +572,6 @@ void init_mqtt(void (*publish_callback)(MqttMessage *msg), void (*mqtt_connected
     gMqttCtx.app_name = "Altair on Azure Sphere";
 
 #ifdef ENABLE_WEB_TERMINAL
-    dx_timerStart(&ping_timer);
     dx_startThreadDetached(waitMessage_task, NULL, "wait for message");    
 #else
     mqtt_connected_cb();

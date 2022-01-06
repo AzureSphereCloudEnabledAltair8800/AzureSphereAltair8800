@@ -129,7 +129,7 @@ static DX_TIMER_BINDING connectionStatusLedOnTimer = {.name = "connectionStatusL
 static DX_TIMER_BINDING measure_sensor_timer = {.period = {30, 0}, .name = "measure_sensor_timer", .handler = measure_sensor_handler};
 static DX_TIMER_BINDING memory_diagnostics_timer = {.period = {60, 0}, .name = "memory_diagnostics_timer", .handler = memory_diagnostics_handler};
 static DX_TIMER_BINDING device_stats_timer = {.period = {45, 0}, .name = "memory_diagnostics_timer", .handler = device_stats_handler};
-static DX_TIMER_BINDING mqtt_do_work_timer = {.name = "mqtt_do_work_timer", .handler = mqtt_dowork_handler};
+static DX_TIMER_BINDING mqtt_do_work_timer = {.repeat = &(struct timespec){0, 250 * ONE_MS}, .name = "mqtt_do_work_timer", .handler = mqtt_dowork_handler};
 static DX_TIMER_BINDING panel_refresh_timer = {.period = {0, 20 * OneMS}, .name = "panel_refresh_timer", .handler = panel_refresh_handler};
 static DX_TIMER_BINDING watchdogMonitorTimer = {.period = {5, 0}, .name = "watchdogMonitorTimer", .handler = WatchdogMonitorTimerHandler};
 

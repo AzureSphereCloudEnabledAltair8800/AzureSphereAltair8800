@@ -54,5 +54,4 @@ void vdisk_mqtt_read_sector(uint32_t offset);
 void vdisk_mqtt_write_sector(vdisk_mqtt_write_sector_t* write_sector);
 void queue_mqtt_message(const uint8_t* data, size_t data_length);
 void send_partial_message(void);
-//void invoke_mqtt_ping(void);
-void send_queued_messages(void);
+void send_mqtt_ping(void);
