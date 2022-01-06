@@ -3,10 +3,12 @@
 
 #include "comms_manager_wolf.h"
 
-#define MAX_BUFFER_SIZE 2048
+#define MAX_BUFFER_SIZE 1024
 
 static bool mqtt_connected = false;
 static bool got_disconnected = true;
+
+static DX_DECLARE_TIMER_HANDLER(ping_handler);
 
 //#define QUEUE_BUFFER_SIZE 256 // this is small buffer to decouple sends from the MQTT-C message received callback
 // uint8_t queued_buffer[QUEUE_BUFFER_SIZE];
@@ -29,10 +31,12 @@ static void (*_mqtt_connected_cb)(void);
 static byte tx_buf[MAX_BUFFER_SIZE];
 static byte rx_buf[MAX_BUFFER_SIZE];
 
-static char output_buffer[MAX_BUFFER_SIZE - 256];
+static char output_buffer[MAX_BUFFER_SIZE / 4];
 static size_t output_buffer_length = 0;
 
 static MQTTCtx gMqttCtx;
+
+static DX_TIMER_BINDING ping_timer = {.repeat = &(struct timespec){15}, .handler = ping_handler, .name = "ping_timer"};
 
 /* locals */
 static word16 mPacketIdLast;
@@ -40,6 +44,19 @@ static word16 mPacketIdLast;
 /* argument parsing */
 // static int myoptind = 0;
 // static char* myoptarg = NULL;
+
+static DX_TIMER_HANDLER(ping_handler)
+{
+    int rc;
+
+    if (mqtt_connected) {
+        dx_Log_Debug("Ping\n");
+        if ((rc = MqttClient_Ping(&gMqttCtx.client)) != MQTT_CODE_SUCCESS) {
+            Log_Debug("MQTT Ping Keep Alive Error: %s (%d)\n", MqttClient_ReturnCodeToString(rc), rc);
+        }
+    }
+}
+DX_TIMER_HANDLER_END
 
 void mqtt_init_ctx(MQTTCtx *mqttCtx)
 {
@@ -52,7 +69,7 @@ void mqtt_init_ctx(MQTTCtx *mqttCtx)
     mqttCtx->keep_alive_sec = DEFAULT_KEEP_ALIVE_SEC;
     // mqttCtx->client_id = kDefClientId;
     // mqttCtx->topic_name = kDefTopicName;
-    mqttCtx->cmd_timeout_ms = DEFAULT_CMD_TIMEOUT_MS;
+    mqttCtx->cmd_timeout_ms = 15000;
 #ifdef WOLFMQTT_V5
     mqttCtx->max_packet_size = DEFAULT_MAX_PKT_SZ;
     mqttCtx->topic_alias = 1;
@@ -226,6 +243,7 @@ static int azure_sphere_mqtt_disconnect_cb(MqttClient *client, int error_code, v
     }
 
     if (mqtt_connected) {
+        dx_Log_Debug("Ping\n");
         if ((rc = MqttClient_Ping(&gMqttCtx.client)) != MQTT_CODE_SUCCESS) {
             Log_Debug("MQTT Ping Keep Alive Error: %s (%d)\n", MqttClient_ReturnCodeToString(rc), rc);
         }
@@ -565,7 +583,8 @@ void init_mqtt(void (*publish_callback)(MqttMessage *msg), void (*mqtt_connected
     gMqttCtx.app_name = "Altair on Azure Sphere";
 
 #ifdef ENABLE_WEB_TERMINAL
-    dx_startThreadDetached(waitMessage_task, NULL, "wait for message");
+    dx_timerStart(&ping_timer);
+    dx_startThreadDetached(waitMessage_task, NULL, "wait for message");    
 #else
     mqtt_connected_cb();
 #endif // ENABLE_WEB_TERMINAL
