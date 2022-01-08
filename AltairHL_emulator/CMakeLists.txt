@@ -28,7 +28,7 @@ add_compile_definitions(MQTT_CA_CERTIFICATE="certs/ca.crt")
 add_compile_definitions(MQTT_CLIENT_PRIVATE_KEY="certs/client.key")
 add_compile_definitions(MQTT_CLIENT_CERTIFICATE="certs/client.crt")
 
-add_compile_definitions(MQTT_WOLF_DRIVER)
+add_compile_definitions(WOLFMQTT_CUSTOM_PRINTF)
 add_compile_definitions(PRINTF=Log_Debug)
 #
 ###################################################################################################################
@@ -42,7 +42,6 @@ add_compile_definitions(WOLFMQTT_NO_STDIO)
 add_compile_definitions(WOLFSSL_USER_SETTINGS)
 # add_compile_definitions(WOLFMQTT_V5)
 add_compile_definitions(__linux__)
-add_compile_definitions(MQTT_USE_WOLFSSL)
 add_compile_definitions(ENABLE_MQTT_TLS)
 add_compile_definitions(NO_DH)
 add_compile_definitions(AZURE_SPHERE)

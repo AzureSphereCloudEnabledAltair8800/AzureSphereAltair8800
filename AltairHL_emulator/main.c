@@ -440,7 +440,7 @@ DX_TIMER_HANDLER_END
 /// <summary>
 /// MQTT Dowork timer callback
 /// </summary>
-static DX_TIMER_HANDLER(mqtt_dowork_handler)
+static DX_TIMER_HANDLER(mqtt_work_scheduler_handler)
 {
     static int mqtt_ping_count = 0;
 

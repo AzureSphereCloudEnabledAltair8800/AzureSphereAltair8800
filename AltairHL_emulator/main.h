@@ -38,7 +38,7 @@ static void connection_status_led_on_handler(EventLoopTimer *eventLoopTimer);
 static void device_stats_handler(EventLoopTimer *eventLoopTimer);
 static void device_twin_set_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 static void measure_sensor_handler(EventLoopTimer *eventLoopTimer);
-static void mqtt_dowork_handler(EventLoopTimer *eventLoopTimer);
+static void mqtt_work_scheduler_handler(EventLoopTimer *eventLoopTimer);
 static void panel_refresh_handler(EventLoopTimer *eventLoopTimer);
 static void process_control_panel_commands(void);
 static void WatchdogMonitorTimerHandler(EventLoopTimer *eventLoopTimer);
@@ -129,7 +129,7 @@ static DX_TIMER_BINDING connectionStatusLedOnTimer = {.name = "connectionStatusL
 static DX_TIMER_BINDING measure_sensor_timer = {.period = {30, 0}, .name = "measure_sensor_timer", .handler = measure_sensor_handler};
 static DX_TIMER_BINDING memory_diagnostics_timer = {.period = {60, 0}, .name = "memory_diagnostics_timer", .handler = memory_diagnostics_handler};
 static DX_TIMER_BINDING device_stats_timer = {.period = {45, 0}, .name = "memory_diagnostics_timer", .handler = device_stats_handler};
-static DX_TIMER_BINDING mqtt_do_work_timer = {.repeat = &(struct timespec){0, 250 * ONE_MS}, .name = "mqtt_do_work_timer", .handler = mqtt_dowork_handler};
+static DX_TIMER_BINDING mqtt_do_work_timer = {.repeat = &(struct timespec){0, 250 * ONE_MS}, .name = "mqtt_do_work_timer", .handler = mqtt_work_scheduler_handler};
 static DX_TIMER_BINDING panel_refresh_timer = {.period = {0, 20 * OneMS}, .name = "panel_refresh_timer", .handler = panel_refresh_handler};
 static DX_TIMER_BINDING watchdogMonitorTimer = {.period = {5, 0}, .name = "watchdogMonitorTimer", .handler = WatchdogMonitorTimerHandler};
 
