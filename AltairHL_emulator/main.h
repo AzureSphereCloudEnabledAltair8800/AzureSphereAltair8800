@@ -34,16 +34,16 @@
 
 typedef struct timespec timespec;
 
-static void *altair_thread(void *arg);
-static void connection_status_led_off_handler(EventLoopTimer *eventLoopTimer);
-static void connection_status_led_on_handler(EventLoopTimer *eventLoopTimer);
-static void device_stats_handler(EventLoopTimer *eventLoopTimer);
-static void device_twin_set_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
-static void measure_sensor_handler(EventLoopTimer *eventLoopTimer);
-static void mqtt_work_scheduler_handler(EventLoopTimer *eventLoopTimer);
-static void panel_refresh_handler(EventLoopTimer *eventLoopTimer);
+static DX_DECLARE_DEVICE_TWIN_HANDLER(device_twin_set_temperature_handler);
+static DX_DECLARE_TIMER_HANDLER(connection_status_led_off_handler);
+static DX_DECLARE_TIMER_HANDLER(connection_status_led_on_handler);
+static DX_DECLARE_TIMER_HANDLER(device_stats_handler);
+static DX_DECLARE_TIMER_HANDLER(measure_sensor_handler);
+static DX_DECLARE_TIMER_HANDLER(mqtt_work_scheduler_handler);
+static DX_DECLARE_TIMER_HANDLER(panel_refresh_handler);
+static DX_DECLARE_TIMER_HANDLER(WatchdogMonitorTimerHandler);
+static void* altair_thread(void* arg);
 static void process_control_panel_commands(void);
-static void WatchdogMonitorTimerHandler(EventLoopTimer *eventLoopTimer);
 
 const uint8_t reverse_lut[16] = {0x0, 0x8, 0x4, 0xc, 0x2, 0xa, 0x6, 0xe, 0x1, 0x9, 0x5, 0xd, 0x3, 0xb, 0x7, 0xf};
 
