@@ -410,29 +410,29 @@ static DX_TIMER_HANDLER(connection_status_led_on_handler)
 
         dx_gpioOn(&azure_iot_connected_led);
         // on for 100ms off for 100ms = 200 ms in total
-        dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){0, 200 * OneMS});
-        dx_timerOneShotSet(&connectionStatusLedOffTimer, &(struct timespec){0, 100 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_on, &(struct timespec){0, 200 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_off, &(struct timespec){0, 100 * OneMS});
 
     } else if (dx_isAzureConnected() && is_mqtt_connected()) {
 
         dx_gpioOn(&azure_iot_connected_led);
         // on for 1400 off for 100ms = 1400 ms in total
-        dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 400 * OneMS});
-        dx_timerOneShotSet(&connectionStatusLedOffTimer, &(struct timespec){1, 300 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_on, &(struct timespec){1, 400 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_off, &(struct timespec){1, 300 * OneMS});
 
     } else if (dx_isNetworkReady()) {
 
         dx_gpioOn(&azure_iot_connected_led);
         // on for 100ms off for 1300ms = 1400 ms in total
-        dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 400 * OneMS});
-        dx_timerOneShotSet(&connectionStatusLedOffTimer, &(struct timespec){0, 700 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_on, &(struct timespec){1, 400 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_off, &(struct timespec){0, 700 * OneMS});
 
     } else {
 
         dx_gpioOn(&azure_iot_connected_led);
         // on for 700ms off for 700ms = 1400 ms in total
-        dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 400 * OneMS});
-        dx_timerOneShotSet(&connectionStatusLedOffTimer, &(struct timespec){0, 100 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_on, &(struct timespec){1, 400 * OneMS});
+        dx_timerOneShotSet(&tmr_connection_status_led_off, &(struct timespec){0, 100 * OneMS});
     }
 }
 DX_TIMER_HANDLER_END
@@ -811,7 +811,7 @@ static void InitPeripheralAndHandlers(void)
 
 #endif // SD_CARD_ENABLED
 
-    dx_timerOneShotSet(&connectionStatusLedOnTimer, &(struct timespec){1, 0});
+    dx_timerOneShotSet(&tmr_connection_status_led_on, &(struct timespec){1, 0});
     dx_startThreadDetached(altair_thread, NULL, "altair_thread");
 
     SetupWatchdog();

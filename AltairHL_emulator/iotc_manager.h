@@ -14,7 +14,7 @@
 extern bool local_serial;
 extern char msgBuffer[MSG_BUFFER_BYTES];
 extern CPU_OPERATING_MODE cpu_operating_mode;
-extern DX_TIMER_BINDING restartDeviceOneShotTimer;
+extern DX_TIMER_BINDING tmr_restart_device;
 extern uint16_t cpu_speed;
 
 #ifdef ALTAIR_FRONT_PANEL_CLICK

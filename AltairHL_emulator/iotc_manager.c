@@ -90,6 +90,6 @@ void delay_restart_device_handler(EventLoopTimer* eventLoopTimer) {
 /// </summary>
 DX_DIRECT_METHOD_RESPONSE_CODE RestartDeviceHandler(JSON_Value* json, DX_DIRECT_METHOD_BINDING* directMethodBinding, char** responseMsg) {
 	*responseMsg = NULL;
-	dx_timerOneShotSet(&restartDeviceOneShotTimer, &(struct timespec){2, 0});  // restart the device in 2 seconds
+	dx_timerOneShotSet(&tmr_restart_device, &(struct timespec){2, 0});  // restart the device in 2 seconds
 	return DX_METHOD_SUCCEEDED;
 }

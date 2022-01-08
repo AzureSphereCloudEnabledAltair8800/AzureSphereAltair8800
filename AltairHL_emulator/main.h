@@ -32,6 +32,8 @@
 #define CORE_DISK_CACHE_COMPONENT_ID "9b684af8-21b9-42aa-91e4-621d5428e497"
 #define CORE_SD_CARD_COMPONENT_ID "005180bc-402f-4cb3-a662-72937dbcde47"
 
+typedef struct timespec timespec;
+
 static void *altair_thread(void *arg);
 static void connection_status_led_off_handler(EventLoopTimer *eventLoopTimer);
 static void connection_status_led_on_handler(EventLoopTimer *eventLoopTimer);
@@ -123,15 +125,15 @@ static DX_GPIO_BINDING azure_iot_connected_led = {
     .pin = AZURE_CONNECTED_LED, .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true, .name = "azure_iot_connected_led"};
 
 // Common Timers
-DX_TIMER_BINDING restartDeviceOneShotTimer = {.name = "restartDeviceOneShotTimer", .handler = delay_restart_device_handler};
-static DX_TIMER_BINDING connectionStatusLedOffTimer = {.name = "connectionStatusLedOffTimer", .handler = connection_status_led_off_handler};
-static DX_TIMER_BINDING connectionStatusLedOnTimer = {.name = "connectionStatusLedOnTimer", .handler = connection_status_led_on_handler};
-static DX_TIMER_BINDING measure_sensor_timer = {.period = {30, 0}, .name = "measure_sensor_timer", .handler = measure_sensor_handler};
-static DX_TIMER_BINDING memory_diagnostics_timer = {.period = {60, 0}, .name = "memory_diagnostics_timer", .handler = memory_diagnostics_handler};
-static DX_TIMER_BINDING device_stats_timer = {.period = {45, 0}, .name = "memory_diagnostics_timer", .handler = device_stats_handler};
-static DX_TIMER_BINDING mqtt_do_work_timer = {.repeat = &(struct timespec){0, 250 * ONE_MS}, .name = "mqtt_do_work_timer", .handler = mqtt_work_scheduler_handler};
-static DX_TIMER_BINDING panel_refresh_timer = {.period = {0, 20 * OneMS}, .name = "panel_refresh_timer", .handler = panel_refresh_handler};
-static DX_TIMER_BINDING watchdogMonitorTimer = {.period = {5, 0}, .name = "watchdogMonitorTimer", .handler = WatchdogMonitorTimerHandler};
+DX_TIMER_BINDING tmr_restart_device = {.name = "tmr_restart_device", .handler = delay_restart_device_handler};
+static DX_TIMER_BINDING tmr_connection_status_led_off = {.name = "tmr_connection_status_led_off", .handler = connection_status_led_off_handler};
+static DX_TIMER_BINDING tmr_connection_status_led_on = {.name = "tmr_connection_status_led_on", .handler = connection_status_led_on_handler};
+static DX_TIMER_BINDING tmr_measure_sensor = {.repeat = &(timespec){30, 0}, .name = "tmr_measure_sensor", .handler = measure_sensor_handler};
+static DX_TIMER_BINDING tmr_memory_diagnostics = {.repeat = &(timespec){60, 0}, .name = "tmr_memory_diagnostics", .handler = memory_diagnostics_handler};
+static DX_TIMER_BINDING tmr_device_stats = {.repeat = &(timespec){45, 0}, .name = "tmr_device_stats", .handler = device_stats_handler};
+static DX_TIMER_BINDING tmr_mqtt_do_work = {.repeat = &(timespec){0, 250 * ONE_MS}, .name = "tmr_mqtt_do_work", .handler = mqtt_work_scheduler_handler};
+static DX_TIMER_BINDING tmr_panel_refresh = {.repeat = &(timespec){0, 20 * OneMS}, .name = "tmr_panel_refresh", .handler = panel_refresh_handler};
+static DX_TIMER_BINDING tmr_watchdog_monitor = {.repeat = &(timespec){5, 0}, .name = "tmr_watchdog_monitor", .handler = WatchdogMonitorTimerHandler};
 
 // Azure IoT Central Properties (Device Twins)
 DX_DEVICE_TWIN_BINDING dt_channelId = {.propertyName = "DesiredChannelId", .twinType = DX_DEVICE_TWIN_INT, .handler = device_twin_set_channel_id_handler};
@@ -187,15 +189,15 @@ static DX_GPIO_BINDING *gpioSet[] = {&azure_iot_connected_led,
     #endif
 #endif // ALTAIR_FRONT_PANEL_RETRO_CLICK
 
-static DX_TIMER_BINDING *timerSet[] = {&connectionStatusLedOnTimer,
-                                       &connectionStatusLedOffTimer,
-                                       &memory_diagnostics_timer,
-                                       &device_stats_timer,
-                                       &measure_sensor_timer,
-                                       &restartDeviceOneShotTimer,
-                                       &mqtt_do_work_timer,
-                                       &panel_refresh_timer,
-                                       &watchdogMonitorTimer
+static DX_TIMER_BINDING *timerSet[] = {&tmr_connection_status_led_on,
+                                       &tmr_connection_status_led_off,
+                                       &tmr_memory_diagnostics,
+                                       &tmr_device_stats,
+                                       &tmr_measure_sensor,
+                                       &tmr_restart_device,
+                                       &tmr_mqtt_do_work,
+                                       &tmr_panel_refresh,
+                                       &tmr_watchdog_monitor
 #if defined(ALTAIR_FRONT_PANEL_CLICK) || defined(ALTAIR_FRONT_PANEL_RETRO_CLICK)
                                        ,
                                        &turnOffNotificationsTimer
