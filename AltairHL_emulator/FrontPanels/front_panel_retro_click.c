@@ -36,7 +36,7 @@ void check_click_4x4key_mode_button(void)
 
         as1115_panel_write(&retro_click);
 
-        dx_timerOneShotSet(&turnOffNotificationsTimer, &(struct timespec){1, 0});
+        dx_timerOneShotSet(&tmr_turn_off_notifications, &(struct timespec){1, 0});
     }
 }
 
@@ -113,7 +113,7 @@ void read_altair_panel_switches(void (*process_control_panel_commands)(void))
 
             process_control_panel_commands();
 
-            dx_timerOneShotSet(&turnOffNotificationsTimer, &(struct timespec){0, OneMS * 300});
+            dx_timerOneShotSet(&tmr_turn_off_notifications, &(struct timespec){0, OneMS * 300});
         }
     }
 }

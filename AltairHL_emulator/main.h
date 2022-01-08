@@ -86,7 +86,7 @@ key4x4_t key4x4 = {.interfaceId = MT3620_ISU1_SPI, .chipSelectId = MT3620_SPI_CS
 DX_GPIO_BINDING buttonB = {.pin = BUTTON_B, .direction = DX_INPUT, .detect = DX_GPIO_DETECT_LOW, .name = "buttonB"};
 
 // turn off notifications
-DX_TIMER_BINDING turnOffNotificationsTimer = {.period = {0, 0}, .name = "turnOffNotificationsTimer", .handler = turn_off_notifications_handler};
+DX_TIMER_BINDING tmr_turn_off_notifications = {.name = "tmr_turn_off_notifications", .handler = turn_off_notifications_handler};
 
 #endif //  ALTAIR_FRONT_PANEL_CLICK
 
@@ -97,7 +97,7 @@ DX_GPIO_BINDING buttonB = {.pin = BUTTON_B, .direction = DX_INPUT, .detect = DX_
 as1115_t retro_click = {.interfaceId = ISU2, .handle = -1, .bitmap64 = 0, .keymap = 0, .debouncePeriodMilliseconds = 500};
 
 // turn off notifications
-DX_TIMER_BINDING turnOffNotificationsTimer = {.period = {0, 0}, .name = "turnOffNotificationsTimer", .handler = turn_off_notifications_handler};
+DX_TIMER_BINDING tmr_turn_off_notifications = {.name = "tmr_turn_off_notifications", .handler = turn_off_notifications_handler};
 
 #endif //  ALTAIR_FRONT_PANEL_RETRO_CLICK
 
@@ -200,7 +200,7 @@ static DX_TIMER_BINDING *timerSet[] = {&tmr_connection_status_led_on,
                                        &tmr_watchdog_monitor
 #if defined(ALTAIR_FRONT_PANEL_CLICK) || defined(ALTAIR_FRONT_PANEL_RETRO_CLICK)
                                        ,
-                                       &turnOffNotificationsTimer
+                                       &tmr_turn_off_notifications
 #endif // ALTAIR_FRONT_PANEL_CLICK
 };
 

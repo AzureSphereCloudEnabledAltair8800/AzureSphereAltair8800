@@ -27,7 +27,7 @@ extern CPU_OPERATING_MODE cpu_operating_mode;
 extern int console_fd;
 as1115_t retro_click;
 extern DX_GPIO_BINDING buttonB;
-extern DX_TIMER_BINDING turnOffNotificationsTimer;
+extern DX_TIMER_BINDING tmr_turn_off_notifications;
 extern uint16_t bus_switches;
 extern DX_I2C_BINDING i2c_as1115_retro;
 

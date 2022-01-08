@@ -28,7 +28,7 @@ extern CPU_OPERATING_MODE cpu_operating_mode;
 extern int console_fd;
 extern key4x4_t key4x4;
 extern DX_GPIO_BINDING buttonB;
-extern DX_TIMER_BINDING turnOffNotificationsTimer;
+extern DX_TIMER_BINDING tmr_turn_off_notifications;
 extern matrix8x8_t panel8x8;
 extern uint16_t bus_switches;
 
